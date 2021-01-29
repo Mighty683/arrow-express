@@ -7,9 +7,15 @@ Main principles:
 - Focus on clean functional programming, avoid usage of complex additional configuration ideas like decorators etc.
 - Flexibility and ease of use
 
+## Installation
+`npm install arrow-express`
 ## Example code
 
 ```ts
+import Express from 'express';
+import BodyParser from "body-parser";
+import {Application, Controller, Route} from 'arrow-express';
+
 Application({
   port: 8080,
   app: Express().use(BodyParser())
@@ -34,7 +40,7 @@ Application({
  * Created paths in express application:
  * GET:/users
  * POST:/users/create
- * 
+ *
  * For full example application check out example folder.
  */
 ```
