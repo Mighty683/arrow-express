@@ -84,9 +84,9 @@ var AppConfigurator = /** @class */ (function () {
                         error_1 = _a.sent();
                         if (!res.writableEnded) {
                             if (error_1 instanceof apiErrorResponse_1.ApiError) {
-                                res.status(error_1.httpCode || 500).send(error_1.response || error_1.message);
+                                res.status(error_1.httpCode || 500).send(error_1.response || 'Internal error');
                             }
-                            res.status(500).send(error_1.message);
+                            res.status(500).send('Internal error');
                         }
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
