@@ -8,17 +8,29 @@ Main principles:
 - Flexibility and ease of use
 
 ## Installation
+To install package use command:
+
 `npm install arrow-express`
+
 ## Example code
 
 ```ts
 import Express from 'express';
 import BodyParser from "body-parser";
+import Compression from 'compression';
+import cors from 'cors';
+
 import {Application, Controller, Route} from 'arrow-express';
+
+const ExpressApp = Express();
+  
+ExpressApp.use(BodyParser());
+ExpressApp.use(Compression());
+ExpressApp.use(cors());
 
 Application({
   port: 8080,
-  app: Express().use(BodyParser())
+  app: ExpressApp
 }).registerController(
   Controller()
     .prefix('users')
@@ -61,7 +73,7 @@ Here you can configure Express application or port used by your application.
 ```ts
 Application({
   port: 8080,
-  app: Express().use(Compression()).use(BodyParser()),
+  app: Express(),
 })
 .start();
 ```
@@ -74,7 +86,8 @@ Controller is used to manage group of routes.
 
 ```ts
 /**
- * We advise to split each controller.
+ * We advise to split each controller into separate file.
+ * Exaple folder structure can be found in example folder.
  */
 function LoginController () {
   return Controller()
@@ -107,7 +120,7 @@ Route is used to manage route handling.
 
 ```ts
 /**
- * Similar to controllers we advise to split every handler / route into separate file.
+ * Similar to controllers we advise to split every guard / route into separate file.
  */
 function CheckToken (): UserId {
   // here we check if user is logged by proper token

@@ -8,8 +8,8 @@ export class AppConfigurator {
   private readonly _express: Express.Application
   private readonly _controllers: ControllerConfiguration[] = [];
   private readonly port: number
-  constructor(port: number, app?: Express.Application) {
-    this._express = app || Express();
+  constructor(port: number, app: Express.Application) {
+    this._express = app;
     this.port = port;
   }
 
@@ -19,7 +19,7 @@ export class AppConfigurator {
     return prefixPath + routePath;
   }
 
-  private registerRoute(controller: ControllerConfiguration, route: RouteConfigurator<unknown>) {
+  private registerRoute(controller: ControllerConfiguration, route: RouteConfigurator) {
     this._express[route.getMethod()](
       AppConfigurator.getRoutePath(
         controller.getPrefix(),
@@ -80,7 +80,7 @@ export class AppConfigurator {
 
 type ApplicationOptions = {
   port: number,
-  app?: Express.Application
+  app: Express.Application
 }
 
 /**

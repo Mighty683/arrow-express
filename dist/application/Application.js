@@ -35,17 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Application = exports.AppConfigurator = void 0;
-var express_1 = __importDefault(require("express"));
 var apiErrorResponse_1 = require("../error/apiErrorResponse");
 var AppConfigurator = /** @class */ (function () {
     function AppConfigurator(port, app) {
         this._controllers = [];
-        this._express = app || express_1.default();
+        this._express = app;
         this.port = port;
     }
     AppConfigurator.getRoutePath = function (prefix, path) {

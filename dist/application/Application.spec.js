@@ -35,14 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var Application_1 = require("./Application");
 var Controller_1 = require("../controller/Controller");
 var Route_1 = require("../route/Route");
-var express_1 = __importDefault(require("express"));
 var apiErrorResponse_1 = require("../error/apiErrorResponse");
 var ts_jest_1 = require("ts-jest");
 var ExpressAppStub = {
@@ -51,20 +47,16 @@ var ExpressAppStub = {
     get: jest.fn(),
     listen: jest.fn(),
 };
-jest.mock('express', function () { return jest.fn(); });
 describe('Application', function () {
-    beforeAll(function () {
-        ts_jest_1.mocked(express_1.default).mockReturnValue(ExpressAppStub);
-    });
     afterEach(function () {
-        ExpressAppStub.use.mockReset();
-        ExpressAppStub.post.mockReset();
-        ExpressAppStub.get.mockReset();
+        ts_jest_1.mocked(ExpressAppStub.use).mockReset();
+        ts_jest_1.mocked(ExpressAppStub.post).mockReset();
+        ts_jest_1.mocked(ExpressAppStub.get).mockReset();
     });
     describe('route registration', function () {
         it('should register post route', function () {
             var handlerSpy = jest.fn();
-            Application_1.Application({ port: 8080 })
+            Application_1.Application({ port: 8080, app: ExpressAppStub })
                 .registerController(Controller_1.Controller()
                 .prefix('prefix')
                 .registerRoute(Route_1.Route()
@@ -75,7 +67,7 @@ describe('Application', function () {
         });
         it('should register get route', function () {
             var handlerSpy = jest.fn();
-            Application_1.Application({ port: 8080 })
+            Application_1.Application({ port: 8080, app: ExpressAppStub })
                 .registerController(Controller_1.Controller().prefix('prefix')
                 .registerRoute(Route_1.Route()
                 .method('get')
@@ -99,12 +91,12 @@ describe('Application', function () {
                 switch (_a.label) {
                     case 0:
                         spy = jest.fn();
-                        Application_1.Application({ port: 8080 })
+                        Application_1.Application({ port: 8080, app: ExpressAppStub })
                             .registerController(Controller_1.Controller()
                             .registerRoute(Route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ExpressAppStub.get.mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).toHaveBeenCalledWith(200);
@@ -120,12 +112,12 @@ describe('Application', function () {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         resSpy.writableEnded = true;
                         spy = jest.fn();
-                        Application_1.Application({ port: 8080 })
+                        Application_1.Application({ port: 8080, app: ExpressAppStub })
                             .registerController(Controller_1.Controller()
                             .registerRoute(Route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ExpressAppStub.get.mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).not.toHaveBeenCalled();
@@ -139,12 +131,12 @@ describe('Application', function () {
                 switch (_a.label) {
                     case 0:
                         spy = jest.fn().mockRejectedValue(new Error());
-                        Application_1.Application({ port: 8080 })
+                        Application_1.Application({ port: 8080, app: ExpressAppStub })
                             .registerController(Controller_1.Controller()
                             .registerRoute(Route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ExpressAppStub.get.mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).toHaveBeenCalledWith(500);
@@ -158,12 +150,12 @@ describe('Application', function () {
                 switch (_a.label) {
                     case 0:
                         spy = jest.fn().mockRejectedValue(new apiErrorResponse_1.ApiError(404));
-                        Application_1.Application({ port: 8080 })
+                        Application_1.Application({ port: 8080, app: ExpressAppStub })
                             .registerController(Controller_1.Controller()
                             .registerRoute(Route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ExpressAppStub.get.mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).toHaveBeenCalledWith(404);
@@ -181,12 +173,12 @@ describe('Application', function () {
                             message: 'msg'
                         };
                         spy = jest.fn().mockRejectedValue(new apiErrorResponse_1.ApiError(401, response));
-                        Application_1.Application({ port: 8080 })
+                        Application_1.Application({ port: 8080, app: ExpressAppStub })
                             .registerController(Controller_1.Controller()
                             .registerRoute(Route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ExpressAppStub.get.mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.send).toHaveBeenCalledWith(response);
@@ -203,12 +195,12 @@ describe('Application', function () {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         resSpy.writableEnded = true;
                         spy = jest.fn().mockRejectedValue(new Error());
-                        Application_1.Application({ port: 8080 })
+                        Application_1.Application({ port: 8080, app: ExpressAppStub })
                             .registerController(Controller_1.Controller()
                             .registerRoute(Route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ExpressAppStub.get.mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).not.toHaveBeenCalled();
