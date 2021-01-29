@@ -1,10 +1,10 @@
-# Framework
+# Arrow Express
 
 Aim of this library is to make express applications bootstrapping easy and fast with zero configuration.
 
 Main principles:
 - Avoid adding complex configuration, lib will work out of the box
-- Focus on clean functional programming, avoid usage of complex ideas like decorators etc.
+- Focus on clean functional programming, avoid usage of complex additional configuration ideas like decorators etc.
 - Flexibility and ease of use
 
 ## Example code
@@ -35,22 +35,22 @@ Application({
  * GET:/users
  * POST:/users/create
  * 
- * For full example application check out exaple folder.
+ * For full example application check out example folder.
  */
 ```
-
-## Application
+## Docs
+### Application
 
 Point of start for every application.
 Here you can configure Express application or port used by your application.
 
 
-### Application Methods
+#### Application Methods
 
 - `registerController` - register controller in application.
 - `start` - starts application, register controllers routes in express app and connect to configured port
 
-### Example usage of Application
+#### Example usage of Application
 
 ```ts
 Application({
@@ -60,16 +60,11 @@ Application({
 .start();
 ```
 
-## Controller
+### Controller
 
 Controller is used to manage group of routes.
 
-### Controller Methods
-
-- `prefix` - register controller prefix which will be used by all routes
-- `registerRoute` - register route in controller
-
-### Example usage of Controller
+#### Example usage of Controller
 
 ```ts
 /**
@@ -93,38 +88,14 @@ Application({port: 8080})
   .start();
 ```
 
-## Route
+#### Controller Methods
+
+- `prefix` - register controller prefix which will be used by all routes
+- `registerRoute` - register route in controller
+
+### Route
 
 Route is used to manage route handling.
-
-### Route Methods
-
-- `method` - register method used for route
-- `path` - register path of route alongside with prefix it is used to create full path
-- `handler` - set request handler, here you can handle request
-- `contextGuard` - used to add pre-checks or side operations for request if guard throw error, handler is not called
-
-### Route handler
-
-Route handler receive 3 arguments:
-
-- `request` - which is Express.Request for path
-- `response` - which is Express.Response
-- `context` - which is optional context returned by last guard
-
-Route handler can return Promise or Object which will be send back with response code 200 or void.
-
-Route handler can also send response itself using `res` then library won't try to send back result pf handler.
-
-
-### Route Guard
-
-Route Guard receive 2 arguments:
-
-- `request` - which is Express.Request for path
-- `response` - which is Express.Response
-
-Route Guard can return context which can be used in handler later.
 
 ### Example usage of route
 
@@ -164,3 +135,32 @@ Application({port: 8080})
 
 // Registered path will be: '/user/myself'
 ```
+
+#### Route Methods
+
+- `method` - register method used for route
+- `path` - register path of route alongside with prefix it is used to create full path
+- `handler` - set request handler, here you can handle request
+- `contextGuard` - used to add pre-checks or side operations for request if guard throw error, handler is not called
+
+#### Route handler
+
+Route handler receive 3 arguments:
+
+- `request` - which is Express.Request for path
+- `response` - which is Express.Response
+- `context` - which is optional context returned by last guard
+
+Route handler can return Promise or Object which will be send back with response code 200 or void.
+
+Route handler can also send response itself using `res` then library won't try to send back result pf handler.
+
+
+#### Route Guard
+
+Route Guard receive 2 arguments:
+
+- `request` - which is Express.Request for path
+- `response` - which is Express.Response
+
+Route Guard can return context which can be used in handler later.

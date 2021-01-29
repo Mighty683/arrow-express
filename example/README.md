@@ -10,3 +10,5 @@ It has no database connection. We recommend use for example typeorm for this pur
     - GET:/users/:id
 - To authorize setup header:
   - `Authorize: Bearer token`
+- Command to run app:
+  - npm install && npm run start:dev
