@@ -1,6 +1,7 @@
+import {Controller, ControllerConfiguration, RouteConfigurator} from "arrow-express";
+
 import { UserService } from '../../data/services/user.service';
 import {GetUserById} from './routes/getUserById.route';
-import {Controller, ControllerConfiguration} from "arrow-express";
 import {GetMyself} from "./routes/getMyself";
 
 export function UserController(userService: UserService): ControllerConfiguration {

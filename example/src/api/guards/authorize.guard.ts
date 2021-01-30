@@ -1,5 +1,5 @@
+import {RequestError} from "arrow-express";
 import Express from 'express';
-import {RequestError} from "../../../../lib";
 
 export type UserContext = {
   userId: number
