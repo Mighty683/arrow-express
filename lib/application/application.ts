@@ -1,7 +1,7 @@
 import Express from 'express';
 
-import {ControllerConfiguration} from '../controller/Controller';
-import {RequestHandler, RouteConfigurator} from '../route/Route';
+import {ControllerConfiguration} from '../controller/controller';
+import {RequestHandler, RouteConfigurator} from '../route/route';
 import {ApiError} from '../error/apiErrorResponse';
 
 export class AppConfigurator {
@@ -46,6 +46,12 @@ export class AppConfigurator {
     }
   }
 
+  private getExpressRoutesAsStrings() {
+    return this._express._router.stack
+      .filter(r => r.route)
+      .map(r => `${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`);
+  }
+
   /**
    * Register controller in application.
    * @param controller - registered controller
@@ -69,11 +75,7 @@ export class AppConfigurator {
     this._express.listen(this.port, async () => {
       console.log(`App started on port ${this.port}`);
       console.log('Routes registered by Express server:');
-      this._express._router.stack
-        .filter(r => r.route)
-        .forEach(
-          r => console.log(`${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`)
-        );
+      this.getExpressRoutesAsStrings().forEach(console.log);
     });
   }
 }

@@ -1,6 +1,6 @@
-import { Application } from './Application';
-import { Controller } from '../controller/Controller';
-import { Route } from '../route/Route';
+import { Application } from './application';
+import { Controller } from '../controller/controller';
+import { Route } from '../route/route';
 import Express from 'express';
 import { ApiError } from '../error/apiErrorResponse';
 import {mocked} from "ts-jest";
@@ -71,12 +71,12 @@ describe('Application', () => {
                 .handler(spy)
             )
         ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as any, resSpy);
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).toHaveBeenCalledWith(200);
     });
     it('should not response 200', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (resSpy as any).writableEnded = true;
+      (resSpy.writableEnded as boolean) = true;
       const spy = jest.fn();
       Application({port: 8080, app: ExpressAppStub})
         .registerController(
@@ -87,7 +87,7 @@ describe('Application', () => {
                 .handler(spy)
             )
         ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as any, resSpy);
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).not.toHaveBeenCalled();
     });
     it('should response 500', async () => {
@@ -101,7 +101,7 @@ describe('Application', () => {
                 .handler(spy)
             )
         ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as any, resSpy);
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).toHaveBeenCalledWith(500);
     });
     it('should response 404', async () => {
@@ -115,7 +115,7 @@ describe('Application', () => {
                 .handler(spy)
             )
         ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as any, resSpy);
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).toHaveBeenCalledWith(404);
     });
     it('should send error response', async () => {
@@ -133,13 +133,13 @@ describe('Application', () => {
                 .handler(spy)
             )
         ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as any, resSpy);
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.send).toHaveBeenCalledWith(response);
       expect(resSpy.status).toHaveBeenCalledWith(500);
     });
     it('should not response', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (resSpy as any).writableEnded = true;
+      (resSpy as never).writableEnded = true;
       const spy = jest.fn().mockRejectedValue(new Error());
       Application({port: 8080, app: ExpressAppStub})
         .registerController(
@@ -150,7 +150,7 @@ describe('Application', () => {
                 .handler(spy)
             )
         ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as any, resSpy);
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).not.toHaveBeenCalled();
     });
   });

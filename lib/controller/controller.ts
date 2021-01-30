@@ -1,4 +1,4 @@
-import {RouteConfigurator} from '../route/Route';
+import {RouteConfigurator} from '../route/route';
 
 export class ControllerConfiguration {
   private _prefix: string
@@ -14,7 +14,7 @@ export class ControllerConfiguration {
 
   /**
    * Register array of _routes in controller
-   * @param _routes - _routes used in controller
+   * @param routes - _routes used in controller
    */
   registerRoutes(...routes: RouteConfigurator<unknown>[]): ControllerConfiguration {
     routes.forEach(route => this.registerRoute(route));
