@@ -2,7 +2,7 @@ import { Application } from './application';
 import { Controller } from '../controller/controller';
 import { Route } from '../route/route';
 import Express from 'express';
-import { ApiError } from '../error/apiErrorResponse';
+import { RequestError } from '../error/request.error';
 import {mocked} from "ts-jest";
 
 const ExpressAppStub: Express.Application = {
@@ -74,7 +74,22 @@ describe('Application', () => {
       await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).toHaveBeenCalledWith(200);
     });
-    it('should not response 200', async () => {
+    it('should not override statusCode', async () => {
+      const spy = jest.fn();
+      resSpy.statusCode = 301;
+      Application({port: 8080, app: ExpressAppStub})
+        .registerController(
+          Controller()
+            .registerRoute(
+              Route()
+                .method('get')
+                .handler(spy)
+            )
+        ).start();
+      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+      expect(resSpy.status).not.toHaveBeenCalledWith(200);
+    });
+    it('should not response 200 when res is not writable', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (resSpy.writableEnded as boolean) = true;
       const spy = jest.fn();
@@ -90,68 +105,85 @@ describe('Application', () => {
       await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).not.toHaveBeenCalled();
     });
-    it('should response 500', async () => {
-      const spy = jest.fn().mockRejectedValue(new Error());
-      Application({port: 8080, app: ExpressAppStub})
-        .registerController(
-          Controller()
-            .registerRoute(
-              Route()
-                .method('get')
-                .handler(spy)
-            )
-        ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
-      expect(resSpy.status).toHaveBeenCalledWith(500);
-    });
-    it('should response 404', async () => {
-      const spy = jest.fn().mockRejectedValue(new ApiError(404));
-      Application({port: 8080, app: ExpressAppStub})
-        .registerController(
-          Controller()
-            .registerRoute(
-              Route()
-                .method('get')
-                .handler(spy)
-            )
-        ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
-      expect(resSpy.status).toHaveBeenCalledWith(404);
-    });
-    it('should send error response', async () => {
-      const response = {
-        code: 1,
-        message: 'msg'
-      };
-      const spy = jest.fn().mockRejectedValue(new ApiError(401, response));
-      Application({port: 8080, app: ExpressAppStub})
-        .registerController(
-          Controller()
-            .registerRoute(
-              Route()
-                .method('get')
-                .handler(spy)
-            )
-        ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
-      expect(resSpy.send).toHaveBeenCalledWith(response);
-      expect(resSpy.status).toHaveBeenCalledWith(500);
-    });
-    it('should not response', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (resSpy.writableEnded as boolean) = true;
-      const spy = jest.fn().mockRejectedValue(new Error());
-      Application({port: 8080, app: ExpressAppStub})
-        .registerController(
-          Controller()
-            .registerRoute(
-              Route()
-                .method('get')
-                .handler(spy)
-            )
-        ).start();
-      await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
-      expect(resSpy.status).not.toHaveBeenCalled();
+
+    describe('error handling', () => {
+      it('should response code 500 by default', async () => {
+        const spy = jest.fn().mockRejectedValue(new RequestError());
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(spy)
+              )
+          ).start();
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(resSpy.status).toHaveBeenCalledWith(500);
+      });
+      it('should response code 500 on non RequestError', async () => {
+        const spy = jest.fn().mockRejectedValue(new Error());
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(spy)
+              )
+          ).start();
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(resSpy.status).toHaveBeenCalledWith(500);
+      });
+      it('should response 404', async () => {
+        const spy = jest.fn().mockRejectedValue(new RequestError(404));
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(spy)
+              )
+          ).start();
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(resSpy.status).toHaveBeenCalledWith(404);
+      });
+      it('should send error response', async () => {
+        const response = {
+          code: 1,
+          message: 'msg'
+        };
+        const spy = jest.fn().mockRejectedValue(new RequestError(401, response));
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(spy)
+              )
+          ).start();
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(resSpy.send).toHaveBeenCalledWith(response);
+        expect(resSpy.status).toHaveBeenCalledWith(500);
+      });
+      it('should not response', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (resSpy.writableEnded as boolean) = true;
+        const spy = jest.fn().mockRejectedValue(new Error());
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(spy)
+              )
+          ).start();
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(resSpy.status).not.toHaveBeenCalled();
+      });
     });
   });
 });

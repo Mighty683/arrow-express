@@ -170,9 +170,11 @@ Route handler receive 3 arguments:
 - `response` - which is Express.Response
 - `context` - which is optional context returned by last guard
 
-Route handler can return Promise or Object which will be send back with response code 200 or void.
-
-Route handler can also send response itself using `res` then library won't try to send back result pf handler.
+Features of route handler:
+- Route handler can return Promise or Object which will be send back with response code 200.
+- Route handler can also send response itself using `res` then library won't try to send result pf handler.
+- Route handler can also setup custom response code then arrow-express won't override it.
+- If route handler will throw RequestError, RequestError will be used to send back desired response.
 
 
 #### Route Guard
@@ -183,3 +185,4 @@ Route Guard receive 2 arguments:
 - `response` - which is Express.Response
 
 Route Guard can return context which can be used in handler later.
+If route guard throw error route handler won't be called.

@@ -1,5 +1,5 @@
 import Express from 'express';
-import {ApiError} from "../../../../lib";
+import {RequestError} from "../../../../lib";
 
 export type UserContext = {
   userId: number
@@ -18,6 +18,6 @@ export const AuthorizeGuard = async (req: Express.Request): Promise<UserContext>
     else
       throw new Error();
   } catch (_) {
-    throw new ApiError(401);
+    throw new RequestError(401);
   }
 };

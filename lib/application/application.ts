@@ -2,7 +2,7 @@ import Express from 'express';
 
 import {ControllerConfiguration} from '../controller/controller';
 import {RequestHandler, RouteConfigurator} from '../route/route';
-import {ApiError} from '../error/apiErrorResponse';
+import {RequestError} from '../error/request.error';
 
 export class AppConfigurator {
   private readonly _express: Express.Application
@@ -34,11 +34,14 @@ export class AppConfigurator {
     try {
       const response = await requestHandler(req, res);
       if (!res.writableEnded) {
-        res.status(200).send(response);
+        if (!res.statusCode) {
+          res.status(200);
+        }
+        res.send(response);
       }
     } catch(error) {
       if (!res.writableEnded) {
-        if (error instanceof ApiError) {
+        if (error instanceof RequestError) {
           res.status(error.httpCode || 500).send(error.response || 'Internal error');
         }
         res.status(500).send('Internal error');
