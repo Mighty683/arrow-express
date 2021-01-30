@@ -3,7 +3,7 @@ import { Controller } from '../controller/controller';
 import { Route } from '../route/route';
 import Express from 'express';
 import { RequestError } from '../error/request.error';
-import {mocked} from "ts-jest";
+import {mocked} from "ts-jest/utils";
 
 const ExpressAppStub: Express.Application = {
   use: jest.fn(),
@@ -19,36 +19,44 @@ describe('Application', () => {
     mocked(ExpressAppStub.post).mockReset();
     mocked(ExpressAppStub.get).mockReset();
   });
-  describe('route registration', () => {
-    it('should register post route', () => {
-      const handlerSpy = jest.fn();
-      Application({port: 8080, app: ExpressAppStub})
-        .registerController(
-          Controller()
-            .prefix('prefix')
-            .registerRoute(
+  describe('start', () => {
+    it('should throw error if app is started multiple times', () => {
+      const testApplication = Application({port: 8080, app: ExpressAppStub});
 
-              Route()
-                .method('post')
-                .path('path')
-                .handler(handlerSpy)
-            )
-        ).start();
-      expect(ExpressAppStub.post).toHaveBeenCalledWith('/prefix/path', expect.any(Function));
+      testApplication.start();
+
+      expect(testApplication.start). toThrow();
     });
-    it('should register get route', () => {
-      const handlerSpy = jest.fn();
-      Application({port: 8080, app: ExpressAppStub})
-        .registerController(
-          Controller().prefix('prefix')
-            .registerRoute(
-              Route()
-                .method('get')
-                .path('')
-                .handler(handlerSpy)
-            )
-        ).start();
-      expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
+    describe('route registration', () => {
+      it('should register post route', () => {
+        const handlerSpy = jest.fn();
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .prefix('prefix')
+              .registerRoute(
+                Route()
+                  .method('post')
+                  .path('path')
+                  .handler(handlerSpy)
+              )
+          ).start();
+        expect(ExpressAppStub.post).toHaveBeenCalledWith('/prefix/path', expect.any(Function));
+      });
+      it('should register get route', () => {
+        const handlerSpy = jest.fn();
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller().prefix('prefix')
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .path('')
+                  .handler(handlerSpy)
+              )
+          ).start();
+        expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
+      });
     });
   });
   describe('request handling', () => {

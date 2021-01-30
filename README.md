@@ -3,6 +3,7 @@
 Aim of this library is to make express applications bootstrapping easy and fast with zero configuration.
 
 Main principles:
+- Use arrow functions :)
 - Avoid adding complex configuration, lib will work out of the box
 - Focus on clean functional programming, avoid usage of complex additional configuration ideas like decorators etc.
 - Flexibility and ease of use

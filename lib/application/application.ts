@@ -8,8 +8,10 @@ export class AppConfigurator {
   private readonly _express: Express.Application
   private readonly _controllers: ControllerConfiguration[] = [];
   private readonly port: number
+  private _started: boolean
   constructor(port: number, app: Express.Application) {
     this._express = app;
+    this._started = false;
     this.port = port;
   }
 
@@ -65,10 +67,23 @@ export class AppConfigurator {
   }
 
   /**
+   * Register controller in application.
+   * @param controllers - controllers to register
+   */
+  registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator {
+    controllers.forEach(controller => this.registerController(controller));
+    return this;
+  }
+
+  /**
    * Starts application, register controllers routes in express app
    * and connect to configured port
    */
   start(): void {
+    if(this._started) {
+      throw new Error('Cannot start application multiple times');
+    }
+    this._started = true;
     this._controllers.forEach(controller => {
       controller.getRoutes().forEach(route => {
         this.registerRoute(controller, route);
