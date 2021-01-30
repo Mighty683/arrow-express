@@ -36,14 +36,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Route_1 = require("./Route");
+var route_1 = require("./route");
 describe('Route', function () {
     var req = {};
     var res = {};
     describe('Request handle configuration', function () {
         it('should call handler', function () {
             var spy = jest.fn();
-            Route_1.Route()
+            route_1.Route()
                 .handler(spy)
                 .getRequestHandler()(req, res);
             expect(spy).toHaveBeenCalledWith(req, res, undefined);
@@ -56,7 +56,7 @@ describe('Route', function () {
                         spy = jest.fn();
                         context = jest.fn();
                         contextGuardSpy = jest.fn().mockReturnValue(context);
-                        return [4 /*yield*/, Route_1.Route()
+                        return [4 /*yield*/, route_1.Route()
                                 .handler(spy)
                                 .contextGuard(contextGuardSpy)
                                 .getRequestHandler()(req, res)];
