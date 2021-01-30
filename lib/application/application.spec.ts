@@ -139,7 +139,7 @@ describe('Application', () => {
     });
     it('should not response', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (resSpy as never).writableEnded = true;
+      (resSpy.writableEnded as boolean) = true;
       const spy = jest.fn().mockRejectedValue(new Error());
       Application({port: 8080, app: ExpressAppStub})
         .registerController(
