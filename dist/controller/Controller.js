@@ -15,7 +15,7 @@ var ControllerConfiguration = /** @class */ (function () {
     };
     /**
      * Register array of _routes in controller
-     * @param _routes - _routes used in controller
+     * @param routes - _routes used in controller
      */
     ControllerConfiguration.prototype.registerRoutes = function () {
         var _this = this;

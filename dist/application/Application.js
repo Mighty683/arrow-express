@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Application = exports.AppConfigurator = void 0;
-var apiErrorResponse_1 = require("../error/apiErrorResponse");
+var request_error_1 = require("../error/request.error");
 var AppConfigurator = /** @class */ (function () {
     function AppConfigurator(port, app) {
         this._controllers = [];
@@ -73,13 +73,16 @@ var AppConfigurator = /** @class */ (function () {
                     case 1:
                         response = _a.sent();
                         if (!res.writableEnded) {
-                            res.status(200).send(response);
+                            if (!res.statusCode) {
+                                res.status(200);
+                            }
+                            res.send(response);
                         }
                         return [3 /*break*/, 3];
                     case 2:
                         error_1 = _a.sent();
                         if (!res.writableEnded) {
-                            if (error_1 instanceof apiErrorResponse_1.ApiError) {
+                            if (error_1 instanceof request_error_1.RequestError) {
                                 res.status(error_1.httpCode || 500).send(error_1.response || 'Internal error');
                             }
                             res.status(500).send('Internal error');
@@ -89,6 +92,11 @@ var AppConfigurator = /** @class */ (function () {
                 }
             });
         });
+    };
+    AppConfigurator.prototype.getExpressRoutesAsStrings = function () {
+        return this._express._router.stack
+            .filter(function (r) { return r.route; })
+            .map(function (r) { var _a; return Object.keys(r.route.methods)[0].toUpperCase() + ":" + ((_a = r.route) === null || _a === void 0 ? void 0 : _a.path); });
     };
     /**
      * Register controller in application.
@@ -113,9 +121,7 @@ var AppConfigurator = /** @class */ (function () {
             return __generator(this, function (_a) {
                 console.log("App started on port " + this.port);
                 console.log('Routes registered by Express server:');
-                this._express._router.stack
-                    .filter(function (r) { return r.route; })
-                    .forEach(function (r) { var _a; return console.log(Object.keys(r.route.methods)[0].toUpperCase() + ":" + ((_a = r.route) === null || _a === void 0 ? void 0 : _a.path)); });
+                this.getExpressRoutesAsStrings().forEach(console.log);
                 return [2 /*return*/];
             });
         }); });

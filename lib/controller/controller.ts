@@ -1,22 +1,22 @@
-import {RouteConfigurator} from '../route/Route';
+import {RouteConfigurator} from '../route/route';
 
 export class ControllerConfiguration {
   private _prefix: string
-  private _routes: RouteConfigurator<unknown>[] = [];
+  private _routes: RouteConfigurator[] = [];
   /**
    * Register route in controller
    * @param route - route used in controller
    */
-  registerRoute(route: RouteConfigurator<unknown>): ControllerConfiguration {
+  registerRoute(route: RouteConfigurator): ControllerConfiguration {
     this._routes.push(route);
     return this;
   }
 
   /**
    * Register array of _routes in controller
-   * @param _routes - _routes used in controller
+   * @param routes - _routes used in controller
    */
-  registerRoutes(...routes: RouteConfigurator<unknown>[]): ControllerConfiguration {
+  registerRoutes(...routes: RouteConfigurator[]): ControllerConfiguration {
     routes.forEach(route => this.registerRoute(route));
     return this;
   }

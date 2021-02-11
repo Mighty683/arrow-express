@@ -1,15 +1,17 @@
 import Express from 'express';
 
-import {ControllerConfiguration} from '../controller/Controller';
-import {RequestHandler, RouteConfigurator} from '../route/Route';
-import {ApiError} from '../error/apiErrorResponse';
+import {ControllerConfiguration} from '../controller/controller';
+import {RequestHandler, RouteConfigurator} from '../route/route';
+import {RequestError} from '../error/request.error';
 
 export class AppConfigurator {
   private readonly _express: Express.Application
   private readonly _controllers: ControllerConfiguration[] = [];
   private readonly port: number
+  private _started: boolean
   constructor(port: number, app: Express.Application) {
     this._express = app;
+    this._started = false;
     this.port = port;
   }
 
@@ -34,16 +36,25 @@ export class AppConfigurator {
     try {
       const response = await requestHandler(req, res);
       if (!res.writableEnded) {
-        res.status(200).send(response);
+        if (!res.statusCode) {
+          res.status(200);
+        }
+        res.send(response);
       }
     } catch(error) {
       if (!res.writableEnded) {
-        if (error instanceof ApiError) {
+        if (error instanceof RequestError) {
           res.status(error.httpCode || 500).send(error.response || 'Internal error');
         }
         res.status(500).send('Internal error');
       }
     }
+  }
+
+  private getExpressRoutesAsStrings() {
+    return this._express._router.stack
+      .filter(r => r.route)
+      .map(r => `${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`);
   }
 
   /**
@@ -56,10 +67,23 @@ export class AppConfigurator {
   }
 
   /**
+   * Register controller in application.
+   * @param controllers - controllers to register
+   */
+  registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator {
+    controllers.forEach(controller => this.registerController(controller));
+    return this;
+  }
+
+  /**
    * Starts application, register controllers routes in express app
    * and connect to configured port
    */
   start(): void {
+    if(this._started) {
+      throw new Error('Cannot start application multiple times');
+    }
+    this._started = true;
     this._controllers.forEach(controller => {
       controller.getRoutes().forEach(route => {
         this.registerRoute(controller, route);
@@ -69,11 +93,7 @@ export class AppConfigurator {
     this._express.listen(this.port, async () => {
       console.log(`App started on port ${this.port}`);
       console.log('Routes registered by Express server:');
-      this._express._router.stack
-        .filter(r => r.route)
-        .forEach(
-          r => console.log(`${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`)
-        );
+      this.getExpressRoutesAsStrings().forEach(console.log);
     });
   }
 }

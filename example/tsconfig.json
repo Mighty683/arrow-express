@@ -3,8 +3,6 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "outDir": "dist",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
         "target": "ES5"
     },
     "include": [
