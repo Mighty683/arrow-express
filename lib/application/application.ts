@@ -93,7 +93,7 @@ export class AppConfigurator {
     this._express.listen(this.port, async () => {
       console.log(`App started on port ${this.port}`);
       console.log('Routes registered by Express server:');
-      this.getExpressRoutesAsStrings().forEach(console.log);
+      this.getExpressRoutesAsStrings().forEach(route => console.log(route));
     });
   }
 }

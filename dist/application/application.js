@@ -139,7 +139,7 @@ var AppConfigurator = /** @class */ (function () {
             return __generator(this, function (_a) {
                 console.log("App started on port " + this.port);
                 console.log('Routes registered by Express server:');
-                this.getExpressRoutesAsStrings().forEach(console.log);
+                this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
                 return [2 /*return*/];
             });
         }); });
