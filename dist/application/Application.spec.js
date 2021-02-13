@@ -40,7 +40,7 @@ var application_1 = require("./application");
 var controller_1 = require("../controller/controller");
 var route_1 = require("../route/route");
 var request_error_1 = require("../error/request.error");
-var ts_jest_1 = require("ts-jest");
+var utils_1 = require("ts-jest/utils");
 var ExpressAppStub = {
     use: jest.fn(),
     post: jest.fn(),
@@ -49,31 +49,38 @@ var ExpressAppStub = {
 };
 describe('Application', function () {
     afterEach(function () {
-        ts_jest_1.mocked(ExpressAppStub.use).mockReset();
-        ts_jest_1.mocked(ExpressAppStub.post).mockReset();
-        ts_jest_1.mocked(ExpressAppStub.get).mockReset();
+        utils_1.mocked(ExpressAppStub.use).mockReset();
+        utils_1.mocked(ExpressAppStub.post).mockReset();
+        utils_1.mocked(ExpressAppStub.get).mockReset();
     });
-    describe('route registration', function () {
-        it('should register post route', function () {
-            var handlerSpy = jest.fn();
-            application_1.Application({ port: 8080, app: ExpressAppStub })
-                .registerController(controller_1.Controller()
-                .prefix('prefix')
-                .registerRoute(route_1.Route()
-                .method('post')
-                .path('path')
-                .handler(handlerSpy))).start();
-            expect(ExpressAppStub.post).toHaveBeenCalledWith('/prefix/path', expect.any(Function));
+    describe('start', function () {
+        it('should throw error if app is started multiple times', function () {
+            var testApplication = application_1.Application({ port: 8080, app: ExpressAppStub });
+            testApplication.start();
+            expect(testApplication.start).toThrow();
         });
-        it('should register get route', function () {
-            var handlerSpy = jest.fn();
-            application_1.Application({ port: 8080, app: ExpressAppStub })
-                .registerController(controller_1.Controller().prefix('prefix')
-                .registerRoute(route_1.Route()
-                .method('get')
-                .path('')
-                .handler(handlerSpy))).start();
-            expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
+        describe('route registration', function () {
+            it('should register post route', function () {
+                var handlerSpy = jest.fn();
+                application_1.Application({ port: 8080, app: ExpressAppStub })
+                    .registerController(controller_1.Controller()
+                    .prefix('prefix')
+                    .registerRoute(route_1.Route()
+                    .method('post')
+                    .path('path')
+                    .handler(handlerSpy))).start();
+                expect(ExpressAppStub.post).toHaveBeenCalledWith('/prefix/path', expect.any(Function));
+            });
+            it('should register get route', function () {
+                var handlerSpy = jest.fn();
+                application_1.Application({ port: 8080, app: ExpressAppStub })
+                    .registerController(controller_1.Controller().prefix('prefix')
+                    .registerRoute(route_1.Route()
+                    .method('get')
+                    .path('')
+                    .handler(handlerSpy))).start();
+                expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
+            });
         });
     });
     describe('request handling', function () {
@@ -96,7 +103,7 @@ describe('Application', function () {
                             .registerRoute(route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).toHaveBeenCalledWith(200);
@@ -116,7 +123,7 @@ describe('Application', function () {
                             .registerRoute(route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).not.toHaveBeenCalledWith(200);
@@ -137,7 +144,7 @@ describe('Application', function () {
                             .registerRoute(route_1.Route()
                             .method('get')
                             .handler(spy))).start();
-                        return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                        return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                     case 1:
                         _a.sent();
                         expect(resSpy.status).not.toHaveBeenCalled();
@@ -157,7 +164,7 @@ describe('Application', function () {
                                 .registerRoute(route_1.Route()
                                 .method('get')
                                 .handler(spy))).start();
-                            return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                            return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                         case 1:
                             _a.sent();
                             expect(resSpy.status).toHaveBeenCalledWith(500);
@@ -176,7 +183,7 @@ describe('Application', function () {
                                 .registerRoute(route_1.Route()
                                 .method('get')
                                 .handler(spy))).start();
-                            return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                            return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                         case 1:
                             _a.sent();
                             expect(resSpy.status).toHaveBeenCalledWith(500);
@@ -195,7 +202,7 @@ describe('Application', function () {
                                 .registerRoute(route_1.Route()
                                 .method('get')
                                 .handler(spy))).start();
-                            return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                            return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                         case 1:
                             _a.sent();
                             expect(resSpy.status).toHaveBeenCalledWith(404);
@@ -218,7 +225,7 @@ describe('Application', function () {
                                 .registerRoute(route_1.Route()
                                 .method('get')
                                 .handler(spy))).start();
-                            return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                            return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                         case 1:
                             _a.sent();
                             expect(resSpy.send).toHaveBeenCalledWith(response);
@@ -240,7 +247,7 @@ describe('Application', function () {
                                 .registerRoute(route_1.Route()
                                 .method('get')
                                 .handler(spy))).start();
-                            return [4 /*yield*/, ts_jest_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
+                            return [4 /*yield*/, utils_1.mocked(ExpressAppStub.get).mock.calls[0][1]({}, resSpy)];
                         case 1:
                             _a.sent();
                             expect(resSpy.status).not.toHaveBeenCalled();
