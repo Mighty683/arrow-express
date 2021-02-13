@@ -45,8 +45,9 @@ export class AppConfigurator {
       if (!res.writableEnded) {
         if (error instanceof RequestError) {
           res.status(error.httpCode || 500).send(error.response || 'Internal error');
+        } else {
+          res.status(500).send('Internal error');
         }
-        res.status(500).send('Internal error');
       }
     }
   }
