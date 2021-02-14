@@ -48,6 +48,8 @@ export class AppConfigurator {
         } else {
           res.status(500).send('Internal error');
         }
+        console.error('Handle request error');
+        console.error(error);
       }
     }
   }

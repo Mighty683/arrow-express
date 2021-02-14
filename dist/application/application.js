@@ -89,6 +89,8 @@ var AppConfigurator = /** @class */ (function () {
                             else {
                                 res.status(500).send('Internal error');
                             }
+                            console.error('Handle request error');
+                            console.error(error_1);
                         }
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
