@@ -86,10 +86,8 @@ Controller is used to manage group of routes.
 #### Example usage of Controller
 
 ```ts
-/**
- * We advise to split each controller into separate file.
- * Exaple folder structure can be found in example folder.
- */
+import {Application, Controller} from 'arrow-express';
+
 function LoginController () {
   return Controller()
     .prefix('login');
@@ -101,7 +99,7 @@ function UserController () {
 }
 
 Application({port: 8080})
-  .registerController(
+  .registerControllers(
     LoginController(),
     UserController(),
   )
@@ -120,9 +118,8 @@ Route is used to manage route handling.
 ### Example usage of route
 
 ```ts
-/**
- * Similar to controllers we advise to split every guard / route into separate file.
- */
+import {Application, Controller, Route} from 'arrow-express';
+
 function CheckToken (): UserId {
   // here we check if user is logged by proper token
   return userId;
