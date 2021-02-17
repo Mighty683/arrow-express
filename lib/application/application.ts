@@ -8,11 +8,17 @@ export class AppConfigurator {
   private readonly _express: Express.Application
   private readonly _controllers: ControllerConfiguration[] = [];
   private readonly port: number
+  private readonly logRequests: boolean;
   private _started: boolean
-  constructor(port: number, app: Express.Application) {
+  constructor(
+    port: number,
+    app: Express.Application,
+    logRequests = true
+  ) {
     this._express = app;
     this._started = false;
     this.port = port;
+    this.logRequests = logRequests;
   }
 
   private static getRoutePath(prefix: string, path: string) {
@@ -27,12 +33,12 @@ export class AppConfigurator {
         controller.getPrefix(),
         route.getPath()),
       async (req: Express.Request, res: Express.Response) => {
-        await AppConfigurator.handleRequest(req, res, route.getRequestHandler());
+        await this.handleRequest(req, res, route.getRequestHandler());
       }
     );
   }
 
-  private static async handleRequest (req: Express.Request, res: Express.Response, requestHandler: RequestHandler): Promise<void> {
+  private async handleRequest (req: Express.Request, res: Express.Response, requestHandler: RequestHandler): Promise<void> {
     try {
       const response = await requestHandler(req, res);
       if (!res.writableEnded) {
@@ -47,10 +53,20 @@ export class AppConfigurator {
           res.status(error.httpCode || 500).send(error.response || 'Internal error');
         } else {
           res.status(500).send('Internal error');
+          if (this.logRequests) {
+            console.error('Internal error');
+            console.error(error);
+          }
         }
-        console.error('Handle request error');
-        console.error(error);
       }
+    } finally {
+      this.logRequest(req, res);
+    }
+  }
+
+  private logRequest(req: Express.Request, res: Express.Response) {
+    if (this.logRequests) {
+      console.log(`${req.method}:/${req.path} Response: ${res.statusCode}`);
     }
   }
 
@@ -104,13 +120,15 @@ export class AppConfigurator {
 type ApplicationOptions = {
   port: number,
   app: Express.Application
+  logRequests?: boolean
 }
 
 /**
  * Creates application core
  * @param options.port - port used by application
  * @param options.app - Express application used by application
+ * @param options.logRequests - log requests on handle
  */
 export function Application(options: ApplicationOptions): AppConfigurator {
-  return new AppConfigurator(options.port, options.app);
+  return new AppConfigurator(options.port, options.app, options.logRequests);
 }

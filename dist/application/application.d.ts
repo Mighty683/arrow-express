@@ -4,11 +4,13 @@ export declare class AppConfigurator {
     private readonly _express;
     private readonly _controllers;
     private readonly port;
+    private readonly logRequests;
     private _started;
-    constructor(port: number, app: Express.Application);
+    constructor(port: number, app: Express.Application, logRequests?: boolean);
     private static getRoutePath;
     private registerRoute;
-    private static handleRequest;
+    private handleRequest;
+    private logRequest;
     private getExpressRoutesAsStrings;
     /**
      * Register controller in application.
@@ -29,11 +31,13 @@ export declare class AppConfigurator {
 declare type ApplicationOptions = {
     port: number;
     app: Express.Application;
+    logRequests?: boolean;
 };
 /**
  * Creates application core
  * @param options.port - port used by application
  * @param options.app - Express application used by application
+ * @param options.logRequests - log requests on handle
  */
 export declare function Application(options: ApplicationOptions): AppConfigurator;
 export {};
