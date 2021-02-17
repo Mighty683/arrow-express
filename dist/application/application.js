@@ -107,7 +107,7 @@ var AppConfigurator = /** @class */ (function () {
     };
     AppConfigurator.prototype.logRequest = function (req, res) {
         if (this.logRequests) {
-            console.log(req.method + ":/" + req.path + " Response: " + res.statusCode);
+            console.log("Request " + req.method + ":" + req.path + " Response: " + res.statusCode);
         }
     };
     AppConfigurator.prototype.getExpressRoutesAsStrings = function () {
@@ -167,7 +167,7 @@ exports.AppConfigurator = AppConfigurator;
  * Creates application core
  * @param options.port - port used by application
  * @param options.app - Express application used by application
- * @param options.logRequests - log requests on handle
+ * @param options.logRequests - log requests, enabled by default
  */
 function Application(options) {
     return new AppConfigurator(options.port, options.app, options.logRequests);

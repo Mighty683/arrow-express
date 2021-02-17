@@ -66,7 +66,7 @@ export class AppConfigurator {
 
   private logRequest(req: Express.Request, res: Express.Response) {
     if (this.logRequests) {
-      console.log(`${req.method}:/${req.path} Response: ${res.statusCode}`);
+      console.log(`Request ${req.method}:${req.path} Response: ${res.statusCode}`);
     }
   }
 

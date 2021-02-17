@@ -37,7 +37,7 @@ declare type ApplicationOptions = {
  * Creates application core
  * @param options.port - port used by application
  * @param options.app - Express application used by application
- * @param options.logRequests - log requests on handle
+ * @param options.logRequests - log requests, enabled by default
  */
 export declare function Application(options: ApplicationOptions): AppConfigurator;
 export {};
