@@ -40,11 +40,13 @@ exports.Application = exports.AppConfigurator = void 0;
 var request_error_1 = require("../error/request.error");
 var configuration_error_1 = require("../error/configuration.error");
 var AppConfigurator = /** @class */ (function () {
-    function AppConfigurator(port, app) {
+    function AppConfigurator(port, app, logRequests) {
+        if (logRequests === void 0) { logRequests = true; }
         this._controllers = [];
         this._express = app;
         this._started = false;
         this.port = port;
+        this.logRequests = logRequests;
     }
     AppConfigurator.getRoutePath = function (prefix, path) {
         var prefixPath = prefix ? "/" + prefix : '/';
@@ -60,7 +62,7 @@ var AppConfigurator = /** @class */ (function () {
         this._express[route.getMethod()](routePath, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, AppConfigurator.handleRequest(req, res, route.getRequestHandler())];
+                    case 0: return [4 /*yield*/, this.handleRequest(req, res, route.getRequestHandler())];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -68,13 +70,13 @@ var AppConfigurator = /** @class */ (function () {
             });
         }); });
     };
-    AppConfigurator.handleRequest = function (req, res, requestHandler) {
+    AppConfigurator.prototype.handleRequest = function (req, res, requestHandler) {
         return __awaiter(this, void 0, void 0, function () {
             var response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 2, 3, 4]);
                         return [4 /*yield*/, requestHandler(req, res)];
                     case 1:
                         response = _a.sent();
@@ -84,20 +86,34 @@ var AppConfigurator = /** @class */ (function () {
                             }
                             res.send(response);
                         }
-                        return [3 /*break*/, 3];
+                        return [3 /*break*/, 4];
                     case 2:
                         error_1 = _a.sent();
                         if (!res.writableEnded) {
                             if (error_1 instanceof request_error_1.RequestError) {
                                 res.status(error_1.httpCode || 500).send(error_1.response || 'Internal error');
                             }
-                            res.status(500).send('Internal error');
+                            else {
+                                res.status(500).send('Internal error');
+                                if (this.logRequests) {
+                                    console.error('Internal error');
+                                    console.error(error_1);
+                                }
+                            }
                         }
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        this.logRequest(req, res);
+                        return [7 /*endfinally*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
+    };
+    AppConfigurator.prototype.logRequest = function (req, res) {
+        if (this.logRequests) {
+            console.log("Request " + req.method + ":" + req.path + " Response: " + res.statusCode);
+        }
     };
     AppConfigurator.prototype.getExpressRoutesAsStrings = function () {
         return this._express._router.stack
@@ -144,7 +160,7 @@ var AppConfigurator = /** @class */ (function () {
             return __generator(this, function (_a) {
                 console.log("App started on port " + this.port);
                 console.log('Routes registered by Express server:');
-                this.getExpressRoutesAsStrings().forEach(console.log);
+                this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
                 return [2 /*return*/];
             });
         }); });
@@ -156,8 +172,9 @@ exports.AppConfigurator = AppConfigurator;
  * Creates application core
  * @param options.port - port used by application
  * @param options.app - Express application used by application
+ * @param options.logRequests - log requests, enabled by default
  */
 function Application(options) {
-    return new AppConfigurator(options.port, options.app);
+    return new AppConfigurator(options.port, options.app, options.logRequests);
 }
 exports.Application = Application;

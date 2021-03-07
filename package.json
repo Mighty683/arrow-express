@@ -1,14 +1,14 @@
 {
   "name": "arrow-express",
-  "version": "0.1.5",
+  "version": "0.2.1",
   "description": "Library to bootstrap express applications with zero configuration",
   "main": "dist/index.js",
-  "types": "lib/index.d.ts",
+  "types": "dist/index.d.ts",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --declaration --project tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

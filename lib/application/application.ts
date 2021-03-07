@@ -9,11 +9,17 @@ export class AppConfigurator {
   private readonly _express: Express.Application
   private readonly _controllers: ControllerConfiguration[] = [];
   private readonly port: number
+  private readonly logRequests: boolean;
   private _started: boolean
-  constructor(port: number, app: Express.Application) {
+  constructor(
+    port: number,
+    app: Express.Application,
+    logRequests = true
+  ) {
     this._express = app;
     this._started = false;
     this.port = port;
+    this.logRequests = logRequests;
   }
 
   private static getRoutePath(prefix: string, path: string) {
@@ -34,12 +40,12 @@ export class AppConfigurator {
     this._express[route.getMethod()](
       routePath,
       async (req: Express.Request, res: Express.Response) => {
-        await AppConfigurator.handleRequest(req, res, route.getRequestHandler());
+        await this.handleRequest(req, res, route.getRequestHandler());
       }
     );
   }
 
-  private static async handleRequest (req: Express.Request, res: Express.Response, requestHandler: RequestHandler): Promise<void> {
+  private async handleRequest (req: Express.Request, res: Express.Response, requestHandler: RequestHandler): Promise<void> {
     try {
       const response = await requestHandler(req, res);
       if (!res.writableEnded) {
@@ -52,9 +58,22 @@ export class AppConfigurator {
       if (!res.writableEnded) {
         if (error instanceof RequestError) {
           res.status(error.httpCode || 500).send(error.response || 'Internal error');
+        } else {
+          res.status(500).send('Internal error');
+          if (this.logRequests) {
+            console.error('Internal error');
+            console.error(error);
+          }
         }
-        res.status(500).send('Internal error');
       }
+    } finally {
+      this.logRequest(req, res);
+    }
+  }
+
+  private logRequest(req: Express.Request, res: Express.Response) {
+    if (this.logRequests) {
+      console.log(`Request ${req.method}:${req.path} Response: ${res.statusCode}`);
     }
   }
 
@@ -100,7 +119,7 @@ export class AppConfigurator {
     this._express.listen(this.port, async () => {
       console.log(`App started on port ${this.port}`);
       console.log('Routes registered by Express server:');
-      this.getExpressRoutesAsStrings().forEach(console.log);
+      this.getExpressRoutesAsStrings().forEach(route => console.log(route));
     });
   }
 }
@@ -108,13 +127,15 @@ export class AppConfigurator {
 type ApplicationOptions = {
   port: number,
   app: Express.Application
+  logRequests?: boolean
 }
 
 /**
  * Creates application core
  * @param options.port - port used by application
  * @param options.app - Express application used by application
+ * @param options.logRequests - log requests, enabled by default
  */
 export function Application(options: ApplicationOptions): AppConfigurator {
-  return new AppConfigurator(options.port, options.app);
+  return new AppConfigurator(options.port, options.app, options.logRequests);
 }
