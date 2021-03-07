@@ -8,8 +8,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "build": "tsc",
-    "test": "test",
+    "build": "tsc --project tsconfig.json",
+    "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "./node_modules/.bin/eslint ."

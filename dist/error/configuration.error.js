@@ -13,20 +13,17 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ApiError = void 0;
-var ApiError = /** @class */ (function (_super) {
-    __extends(ApiError, _super);
-    function ApiError(httpCode, response) {
-        var _this = _super.call(this, 'Wrong api response') || this;
-        _this.response = response;
-        _this.httpCode = httpCode || 500;
-        /**
-           * Workaround for error extending
-           * https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-           */
-        Object.setPrototypeOf(_this, ApiError.prototype);
+exports.ConfigurationError = void 0;
+/**
+ * Error related to arrow-express configuration.
+ */
+var ConfigurationError = /** @class */ (function (_super) {
+    __extends(ConfigurationError, _super);
+    function ConfigurationError(message) {
+        var _this = _super.call(this, message) || this;
+        Object.setPrototypeOf(_this, ConfigurationError.prototype);
         return _this;
     }
-    return ApiError;
+    return ConfigurationError;
 }(Error));
-exports.ApiError = ApiError;
+exports.ConfigurationError = ConfigurationError;

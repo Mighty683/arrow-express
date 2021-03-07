@@ -38,10 +38,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Application = exports.AppConfigurator = void 0;
 var request_error_1 = require("../error/request.error");
+var configuration_error_1 = require("../error/configuration.error");
 var AppConfigurator = /** @class */ (function () {
     function AppConfigurator(port, app) {
         this._controllers = [];
         this._express = app;
+        this._started = false;
         this.port = port;
     }
     AppConfigurator.getRoutePath = function (prefix, path) {
@@ -51,7 +53,11 @@ var AppConfigurator = /** @class */ (function () {
     };
     AppConfigurator.prototype.registerRoute = function (controller, route) {
         var _this = this;
-        this._express[route.getMethod()](AppConfigurator.getRoutePath(controller.getPrefix(), route.getPath()), function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+        var routePath = AppConfigurator.getRoutePath(controller.getPrefix(), route.getPath());
+        if (!route.getMethod()) {
+            throw new configuration_error_1.ConfigurationError("Route " + routePath + " has no method specified");
+        }
+        this._express[route.getMethod()](routePath, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, AppConfigurator.handleRequest(req, res, route.getRequestHandler())];
@@ -107,11 +113,28 @@ var AppConfigurator = /** @class */ (function () {
         return this;
     };
     /**
+     * Register controller in application.
+     * @param controllers - controllers to register
+     */
+    AppConfigurator.prototype.registerControllers = function () {
+        var _this = this;
+        var controllers = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            controllers[_i] = arguments[_i];
+        }
+        controllers.forEach(function (controller) { return _this.registerController(controller); });
+        return this;
+    };
+    /**
      * Starts application, register controllers routes in express app
      * and connect to configured port
      */
     AppConfigurator.prototype.start = function () {
         var _this = this;
+        if (this._started) {
+            throw new Error('Cannot start application multiple times');
+        }
+        this._started = true;
         this._controllers.forEach(function (controller) {
             controller.getRoutes().forEach(function (route) {
                 _this.registerRoute(controller, route);
