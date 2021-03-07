@@ -3,6 +3,7 @@ import Express from 'express';
 import {ControllerConfiguration} from '../controller/controller';
 import {RequestHandler, RouteConfigurator} from '../route/route';
 import {RequestError} from '../error/request.error';
+import {ConfigurationError} from "../error/configuration.error";
 
 export class AppConfigurator {
   private readonly _express: Express.Application
@@ -22,10 +23,16 @@ export class AppConfigurator {
   }
 
   private registerRoute(controller: ControllerConfiguration, route: RouteConfigurator) {
-    this._express[route.getMethod()](
-      AppConfigurator.getRoutePath(
+    const routePath = AppConfigurator.getRoutePath(
         controller.getPrefix(),
-        route.getPath()),
+        route.getPath());
+
+    if (!route.getMethod()) {
+      throw new ConfigurationError(`Route ${routePath} has no method specified`)
+    }
+
+    this._express[route.getMethod()](
+      routePath,
       async (req: Express.Request, res: Express.Response) => {
         await AppConfigurator.handleRequest(req, res, route.getRequestHandler());
       }

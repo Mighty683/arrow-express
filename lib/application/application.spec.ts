@@ -4,6 +4,7 @@ import { Route } from '../route/route';
 import Express from 'express';
 import { RequestError } from '../error/request.error';
 import {mocked} from "ts-jest/utils";
+import {ConfigurationError} from "../error/configuration.error";
 
 const ExpressAppStub: Express.Application = {
   use: jest.fn(),
@@ -43,6 +44,7 @@ describe('Application', () => {
           ).start();
         expect(ExpressAppStub.post).toHaveBeenCalledWith('/prefix/path', expect.any(Function));
       });
+
       it('should register get route', () => {
         const handlerSpy = jest.fn();
         Application({port: 8080, app: ExpressAppStub})
@@ -56,6 +58,48 @@ describe('Application', () => {
               )
           ).start();
         expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
+      });
+
+      it('should register route without path', () => {
+        const handlerSpy = jest.fn();
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller().prefix('prefix')
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(handlerSpy)
+              )
+          ).start();
+        expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
+      });
+
+      it('should register route without path and prefix', () => {
+        const handlerSpy = jest.fn();
+        Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller()
+              .registerRoute(
+                Route()
+                  .method('get')
+                  .handler(handlerSpy)
+              )
+          ).start();
+        expect(ExpressAppStub.get).toHaveBeenCalledWith('/', expect.any(Function));
+      });
+
+      it('should throw configuration error when route without method is registered', () => {
+        const handlerSpy = jest.fn();
+        const app = Application({port: 8080, app: ExpressAppStub})
+          .registerController(
+            Controller().prefix('prefix')
+              .registerRoute(
+                Route()
+                  .path('')
+                  .handler(handlerSpy)
+              )
+          );
+        expect(() => app.start()).toThrow(ConfigurationError);
       });
     });
   });
