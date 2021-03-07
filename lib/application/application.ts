@@ -107,7 +107,7 @@ export class AppConfigurator {
    */
   start(): void {
     if(this._started) {
-      throw new Error('Cannot start application multiple times');
+      throw new ConfigurationError('Cannot start application multiple times');
     }
     this._started = true;
     this._controllers.forEach(controller => {
@@ -120,6 +120,7 @@ export class AppConfigurator {
       console.log(`App started on port ${this.port}`);
       console.log('Routes registered by Express server:');
       this.getExpressRoutesAsStrings().forEach(route => console.log(route));
+      console.log('\n');
     });
   }
 }

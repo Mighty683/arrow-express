@@ -148,7 +148,7 @@ var AppConfigurator = /** @class */ (function () {
     AppConfigurator.prototype.start = function () {
         var _this = this;
         if (this._started) {
-            throw new Error('Cannot start application multiple times');
+            throw new configuration_error_1.ConfigurationError('Cannot start application multiple times');
         }
         this._started = true;
         this._controllers.forEach(function (controller) {
@@ -161,6 +161,7 @@ var AppConfigurator = /** @class */ (function () {
                 console.log("App started on port " + this.port);
                 console.log('Routes registered by Express server:');
                 this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
+                console.log('\n');
                 return [2 /*return*/];
             });
         }); });
