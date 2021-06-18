@@ -1,4 +1,5 @@
 "use strict";
+/* istanbul ignore file */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RequestError = exports.RouteConfigurator = exports.Route = exports.ControllerConfiguration = exports.Controller = exports.AppConfigurator = exports.Application = void 0;
 var application_1 = require("./application/application");

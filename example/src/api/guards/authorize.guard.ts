@@ -10,6 +10,7 @@ export type UserContext = {
 export const AuthorizeGuard = async (req: Express.Request): Promise<UserContext> => {
   const authHeader = req.headers.authorization;
   try {
+    // Here place your token authorization
     const token = (authHeader as string).split(' ')[1];
     if (token === 'token')
       return {

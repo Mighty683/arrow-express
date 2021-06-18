@@ -5,8 +5,8 @@ import { User } from '../entities/user.entity';
  */
 let stubUser: User = {
   id: 1, mail: "example@example.com", password_hash: "hash", role: "admin", user_name: "administrator"
-
 }
+
 export class UserService {
     constructor () {
     }

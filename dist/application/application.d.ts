@@ -6,27 +6,43 @@ export declare class AppConfigurator {
     private readonly port;
     private readonly logRequests;
     private _started;
-    constructor(port: number, app: Express.Application, logRequests?: boolean);
-    private static getRoutePath;
-    private registerRoute;
-    private handleRequest;
-    private logRequest;
-    private getExpressRoutesAsStrings;
+    /**
+     *
+     * @param port - port which will be used by application
+     * @param expressApplication - express application
+     * @param logRequests - flag if requests should be logged, true by default
+     */
+    constructor(port: number, expressApplication: Express.Application, logRequests?: boolean);
+    /**
+     * Starts application, register controllers routes in express app
+     * and connect to configured port.
+     */
+    start(): void;
     /**
      * Register controller in application.
      * @param controller - registered controller
      */
     registerController(controller: ControllerConfiguration): AppConfigurator;
     /**
-     * Register controller in application.
+     * Register list of controllers in application.
      * @param controllers - controllers to register
      */
     registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator;
+    private startExpressApplication;
+    private registerControllersInExpress;
+    private registerRouteInExpress;
+    private createApplicationRequestHandler;
+    private logRequest;
+    private getExpressRoutesAsStrings;
+    private static expressRouteAsString;
     /**
-     * Starts application, register controllers routes in express app
-     * and connect to configured port
+     * Get final route path
+     * @param prefix - prefix of route
+     * @param path - path
+     * @private
      */
-    start(): void;
+    private static getRoutePath;
+    private static isResponseAlreadyEnded;
 }
 declare type ApplicationOptions = {
     port: number;

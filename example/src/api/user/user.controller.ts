@@ -2,14 +2,14 @@ import {Controller, ControllerConfiguration, RouteConfigurator} from "arrow-expr
 
 import { UserService } from '../../data/services/user.service';
 import {GetUserById} from './routes/getUserById.route';
-import {GetMyself} from "./routes/getMyself";
+import {GetMyselfRoute} from "./routes/getMyself.route";
 
 export function UserController(userService: UserService): ControllerConfiguration {
   return Controller()
     .prefix('users')
     .registerRoutes(
       GetUserById(userService),
-      GetMyself(userService)
+      GetMyselfRoute(userService)
     );
 }
 

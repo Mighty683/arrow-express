@@ -30,6 +30,10 @@ export declare class RouteConfigurator<Context = unknown> {
     handler(handler: RouteHandler<Context>): RouteConfigurator<Context>;
     getMethod(): string;
     getPath(): string;
+    /**
+     * Get request handler function
+     * @return - function which is called by express application on request
+     */
     getRequestHandler(): RequestHandler;
 }
 export declare function Route<Context = void>(): RouteConfigurator<Context>;

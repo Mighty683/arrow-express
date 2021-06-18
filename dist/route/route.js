@@ -78,6 +78,10 @@ var RouteConfigurator = /** @class */ (function () {
     RouteConfigurator.prototype.getPath = function () {
         return this._path;
     };
+    /**
+     * Get request handler function
+     * @return - function which is called by express application on request
+     */
     RouteConfigurator.prototype.getRequestHandler = function () {
         var _this = this;
         return function (request, response) { return __awaiter(_this, void 0, void 0, function () {

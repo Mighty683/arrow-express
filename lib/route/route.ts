@@ -23,10 +23,12 @@ export class RouteConfigurator<Context = unknown> {
    * Register path of route alongside with prefix it is used to create full path
    * @param path 
    */
+
   path(path: string): RouteConfigurator<Context> {
     this._path = path;
     return this;
   }
+
   /**
    * Used to add pre-checks or side operations for request if guard throw error, handler is not called
    * @param guard - ContextGuard returning context used by handler
@@ -35,6 +37,7 @@ export class RouteConfigurator<Context = unknown> {
     this._contextGuard = guard;
     return this as unknown as RouteConfigurator<NewContext>;
   }
+
   /**
    * Set request handler, here you can handle request
    * @param handler - RouteHandler
@@ -43,12 +46,19 @@ export class RouteConfigurator<Context = unknown> {
     this._handler = handler;
     return this;
   }
+
   getMethod(): string {
     return this._method;
   }
+
   getPath(): string {
     return this._path;
   }
+
+  /**
+   * Get request handler function
+   * @return - function which is called by express application on request
+   */
   getRequestHandler(): RequestHandler {
     return async (request: Express.Request, response: Express.Response) => {
       return this._handler(request, response, this._contextGuard && await this._contextGuard(request, response));

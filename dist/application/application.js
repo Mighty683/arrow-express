@@ -40,47 +40,94 @@ exports.Application = exports.AppConfigurator = void 0;
 var request_error_1 = require("../error/request.error");
 var configuration_error_1 = require("../error/configuration.error");
 var AppConfigurator = /** @class */ (function () {
-    function AppConfigurator(port, app, logRequests) {
+    /**
+     *
+     * @param port - port which will be used by application
+     * @param expressApplication - express application
+     * @param logRequests - flag if requests should be logged, true by default
+     */
+    function AppConfigurator(port, expressApplication, logRequests) {
         if (logRequests === void 0) { logRequests = true; }
         this._controllers = [];
-        this._express = app;
+        this._express = expressApplication;
         this._started = false;
         this.port = port;
         this.logRequests = logRequests;
     }
-    AppConfigurator.getRoutePath = function (prefix, path) {
-        var prefixPath = prefix ? "/" + prefix : '/';
-        var routePath = path ? "" + (prefix ? "/" + path : path) : '';
-        return prefixPath + routePath;
+    /**
+     * Starts application, register controllers routes in express app
+     * and connect to configured port.
+     */
+    AppConfigurator.prototype.start = function () {
+        if (this._started) {
+            throw new configuration_error_1.ConfigurationError('Cannot start application multiple times');
+        }
+        else {
+            this._started = true;
+        }
+        this.registerControllersInExpress();
+        this.startExpressApplication();
     };
-    AppConfigurator.prototype.registerRoute = function (controller, route) {
+    /**
+     * Register controller in application.
+     * @param controller - registered controller
+     */
+    AppConfigurator.prototype.registerController = function (controller) {
+        this._controllers.push(controller);
+        return this;
+    };
+    /**
+     * Register list of controllers in application.
+     * @param controllers - controllers to register
+     */
+    AppConfigurator.prototype.registerControllers = function () {
         var _this = this;
+        var controllers = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            controllers[_i] = arguments[_i];
+        }
+        controllers.forEach(function (controller) { return _this.registerController(controller); });
+        return this;
+    };
+    // PRIVATE
+    AppConfigurator.prototype.startExpressApplication = function () {
+        var _this = this;
+        this._express.listen(this.port, function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                console.log("App started on port " + this.port);
+                console.log('Routes registered by Express server:');
+                this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
+                return [2 /*return*/];
+            });
+        }); });
+    };
+    AppConfigurator.prototype.registerControllersInExpress = function () {
+        var _this = this;
+        this._controllers.forEach(function (controller) {
+            controller.getRoutes().forEach(function (route) {
+                _this.registerRouteInExpress(controller, route);
+            });
+        });
+    };
+    AppConfigurator.prototype.registerRouteInExpress = function (controller, route) {
         var routePath = AppConfigurator.getRoutePath(controller.getPrefix(), route.getPath());
         if (!route.getMethod()) {
             throw new configuration_error_1.ConfigurationError("Route " + routePath + " has no method specified");
         }
-        this._express[route.getMethod()](routePath, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.handleRequest(req, res, route.getRequestHandler())];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
+        this._express[route.getMethod()](routePath, this.createApplicationRequestHandler(route.getRequestHandler()));
     };
-    AppConfigurator.prototype.handleRequest = function (req, res, requestHandler) {
-        return __awaiter(this, void 0, void 0, function () {
+    AppConfigurator.prototype.createApplicationRequestHandler = function (routeRequestHandler) {
+        var _this = this;
+        return function (req, res) { return __awaiter(_this, void 0, void 0, function () {
             var response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, 3, 4]);
-                        return [4 /*yield*/, requestHandler(req, res)];
+                        return [4 /*yield*/, routeRequestHandler(req, res)];
                     case 1:
                         response = _a.sent();
-                        if (!res.writableEnded) {
+                        if (AppConfigurator.isResponseAlreadyEnded(res)) {
                             if (!res.statusCode) {
                                 res.status(200);
                             }
@@ -89,7 +136,7 @@ var AppConfigurator = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 2:
                         error_1 = _a.sent();
-                        if (!res.writableEnded) {
+                        if (AppConfigurator.isResponseAlreadyEnded(res)) {
                             if (error_1 instanceof request_error_1.RequestError) {
                                 res.status(error_1.httpCode || 500).send(error_1.response || 'Internal error');
                             }
@@ -108,7 +155,7 @@ var AppConfigurator = /** @class */ (function () {
                     case 4: return [2 /*return*/];
                 }
             });
-        });
+        }); };
     };
     AppConfigurator.prototype.logRequest = function (req, res) {
         if (this.logRequests) {
@@ -118,53 +165,26 @@ var AppConfigurator = /** @class */ (function () {
     AppConfigurator.prototype.getExpressRoutesAsStrings = function () {
         return this._express._router.stack
             .filter(function (r) { return r.route; })
-            .map(function (r) { var _a; return Object.keys(r.route.methods)[0].toUpperCase() + ":" + ((_a = r.route) === null || _a === void 0 ? void 0 : _a.path); });
+            .map(AppConfigurator.expressRouteAsString);
+    };
+    // STATIC
+    AppConfigurator.expressRouteAsString = function (r) {
+        var _a;
+        return Object.keys(r.route.methods)[0].toUpperCase() + ":" + ((_a = r.route) === null || _a === void 0 ? void 0 : _a.path);
     };
     /**
-     * Register controller in application.
-     * @param controller - registered controller
+     * Get final route path
+     * @param prefix - prefix of route
+     * @param path - path
+     * @private
      */
-    AppConfigurator.prototype.registerController = function (controller) {
-        this._controllers.push(controller);
-        return this;
+    AppConfigurator.getRoutePath = function (prefix, path) {
+        var prefixPath = prefix ? "/" + prefix : '/';
+        var routePath = path ? "" + (prefix ? "/" + path : path) : '';
+        return prefixPath + routePath;
     };
-    /**
-     * Register controller in application.
-     * @param controllers - controllers to register
-     */
-    AppConfigurator.prototype.registerControllers = function () {
-        var _this = this;
-        var controllers = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            controllers[_i] = arguments[_i];
-        }
-        controllers.forEach(function (controller) { return _this.registerController(controller); });
-        return this;
-    };
-    /**
-     * Starts application, register controllers routes in express app
-     * and connect to configured port
-     */
-    AppConfigurator.prototype.start = function () {
-        var _this = this;
-        if (this._started) {
-            throw new configuration_error_1.ConfigurationError('Cannot start application multiple times');
-        }
-        this._started = true;
-        this._controllers.forEach(function (controller) {
-            controller.getRoutes().forEach(function (route) {
-                _this.registerRoute(controller, route);
-            });
-        });
-        this._express.listen(this.port, function () { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                console.log("App started on port " + this.port);
-                console.log('Routes registered by Express server:');
-                this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
-                console.log('\n');
-                return [2 /*return*/];
-            });
-        }); });
+    AppConfigurator.isResponseAlreadyEnded = function (res) {
+        return !res.writableEnded;
     };
     return AppConfigurator;
 }());
