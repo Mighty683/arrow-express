@@ -3,7 +3,6 @@ You can test out this application for example with Postman.
 
 It has no database connection. We recommend use for example typeorm for this purpose.
 
-# You can copy this folder as boilerplate for 
 # Default settings
 - Command to run app:
   - `npm install && npm run start:dev`
@@ -13,3 +12,5 @@ It has no database connection. We recommend use for example typeorm for this pur
     - GET:/users/:id
 - To authorize setup header:
   - `Authorize: Bearer token`
+  
+### You can copy this folder as boilerplate for your application
