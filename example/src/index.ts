@@ -1,7 +1,6 @@
 // Express packages
 import Express from 'express';
 import Compression from 'compression';
-import BodyParser from 'body-parser';
 import cors from 'cors';
 
 // Api packages
@@ -17,7 +16,7 @@ async function startServer() {
 
   expressApplication.use(cors());
   expressApplication.use(Compression());
-  expressApplication.use(BodyParser());
+  expressApplication.use(Express.json());
 
   Application({
     port: 3000,

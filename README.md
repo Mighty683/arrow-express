@@ -17,7 +17,6 @@ To install package use command:
 
 ```ts
 import Express from 'express';
-import BodyParser from "body-parser";
 import Compression from 'compression';
 import cors from 'cors';
 
@@ -25,7 +24,7 @@ import {Application, Controller, Route} from 'arrow-express';
 
 const ExpressApp = Express();
   
-ExpressApp.use(BodyParser());
+ExpressApp.use(Express.json());
 ExpressApp.use(Compression());
 ExpressApp.use(cors());
 
