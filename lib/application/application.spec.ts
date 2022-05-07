@@ -1,7 +1,8 @@
+import Express from 'express';
+
 import { Application } from './application';
 import { Controller } from '../controller/controller';
 import { Route } from '../route/route';
-import Express from 'express';
 import { RequestError } from '../error/request.error';
 import {mocked} from "ts-jest/utils";
 import {ConfigurationError} from "../error/configuration.error";
@@ -100,6 +101,28 @@ describe('Application', () => {
               )
           );
         expect(() => app.start()).toThrow(ConfigurationError);
+      });
+
+      describe('sub controllers', () => {
+        it('should register sub controller route', () => {
+
+          const handlerSpy = jest.fn();
+          Application({port: 8080, app: ExpressAppStub})
+            .registerController(
+              Controller()
+                .prefix('root')
+                .registerController(
+                  Controller()
+                    .prefix('sub')
+                    .registerRoute(
+                      Route()
+                        .method('get')
+                        .handler(handlerSpy)
+                    )
+                )
+            ).start();
+          expect(ExpressAppStub.get).toHaveBeenCalledWith('/root/sub', expect.any(Function));
+        });
       });
     });
   });

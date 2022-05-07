@@ -1,8 +1,29 @@
 import {RouteConfigurator} from '../route/route';
 
 export class ControllerConfiguration {
-  private _prefix: string
+  private _prefix = ''
+  private _controllers: ControllerConfiguration[] = [];
   private _routes: RouteConfigurator[] = [];
+
+  /**
+   * Register child controller in controller
+   * @param controller - controller to register
+   */
+  registerController(controller: ControllerConfiguration): ControllerConfiguration {
+    this._controllers.push(controller);
+    return this;
+  }
+
+
+  /**
+   * Register array of controllers in controller
+   * @param controllers - routes used in controller
+   */
+  registerControllers(...controllers: ControllerConfiguration[]): ControllerConfiguration {
+    controllers.forEach(this.registerController.bind(this));
+    return this;
+  }
+
   /**
    * Register route in controller
    * @param route - route used in controller
@@ -13,15 +34,15 @@ export class ControllerConfiguration {
   }
 
   /**
-   * Register array of _routes in controller
-   * @param routes - _routes used in controller
+   * Register array of routes in controller
+   * @param routes - routes used in controller
    */
   registerRoutes(...routes: RouteConfigurator[]): ControllerConfiguration {
-    routes.forEach(route => this.registerRoute(route));
+    routes.forEach(this.registerRoute.bind(this));
     return this;
   }
   /**
-   * Register controller prefix which will be used by all _routes
+   * Register controller prefix which will be used by all routes
    * @param prefix - eg: 'login'
    */
   prefix(prefix: string): ControllerConfiguration {
@@ -33,8 +54,12 @@ export class ControllerConfiguration {
     return this._prefix;
   }
 
-  getRoutes(): RouteConfigurator<unknown>[] {
+  getRoutes(): RouteConfigurator[] {
     return this._routes;
+  }
+
+  getControllers(): ControllerConfiguration[] {
+    return this._controllers;
   }
 }
 

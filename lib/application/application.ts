@@ -40,7 +40,7 @@ export class AppConfigurator {
     } else {
       this._started = true;
     }
-    this.registerControllersInExpress();
+    this.startControllers();
     this.startExpressApplication();
   }
 
@@ -58,7 +58,7 @@ export class AppConfigurator {
    * @param controllers - controllers to register
    */
   registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator {
-    controllers.forEach(controller => this.registerController(controller));
+    controllers.forEach(this.registerController);
     return this;
   }
 
@@ -72,16 +72,22 @@ export class AppConfigurator {
     });
   }
 
-  private registerControllersInExpress() {
-    this._controllers.forEach(controller => {
-      controller.getRoutes().forEach(route => {
-        this.registerRouteInExpress(controller, route);
-      });
+  private startControllers() {
+    this._controllers.forEach(controller => this.startController(controller));
+  }
+
+  private startController(controller: ControllerConfiguration, prefix = '') {
+    controller.getControllers().forEach((subController => {
+      this.startController(subController, AppConfigurator.getRoutePath(controller.getPrefix(), prefix));
+    }));
+    controller.getRoutes().forEach(route => {
+      this.registerRouteInExpress(controller, route, prefix);
     });
   }
 
-  private registerRouteInExpress(controller: ControllerConfiguration, route: RouteConfigurator) {
+  private registerRouteInExpress(controller: ControllerConfiguration, route: RouteConfigurator, prefix?: string) {
     const routePath = AppConfigurator.getRoutePath(
+      prefix,
       controller.getPrefix(),
       route.getPath());
 
@@ -90,7 +96,7 @@ export class AppConfigurator {
     }
 
     this._express[route.getMethod()](
-      routePath,
+      `/${routePath}`,
       this.createApplicationRequestHandler(route.getRequestHandler())
     );
   }
@@ -145,14 +151,11 @@ export class AppConfigurator {
 
   /**
    * Get final route path
-   * @param prefix - prefix of route
-   * @param path - path
+   * @param paths - array of paths
    * @private
    */
-  private static getRoutePath(prefix: string, path: string) {
-    const prefixPath = prefix ? `/${prefix}` : '/';
-    const routePath = path ? `${prefix ? `/${path}` : path}` : '';
-    return prefixPath + routePath;
+  private static getRoutePath(...paths: string[]) {
+    return paths.filter(path => !!path).join(`/`);
   }
 
   private static isResponseAlreadyEnded(res: Express.Response) {
