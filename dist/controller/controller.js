@@ -3,8 +3,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Controller = exports.ControllerConfiguration = void 0;
 var ControllerConfiguration = /** @class */ (function () {
     function ControllerConfiguration() {
+        this._prefix = '';
+        this._controllers = [];
         this._routes = [];
     }
+    /**
+     * Register child controller in controller
+     * @param controller - controller to register
+     */
+    ControllerConfiguration.prototype.registerController = function (controller) {
+        this._controllers.push(controller);
+        return this;
+    };
+    /**
+     * Register array of controllers in controller
+     * @param controllers - routes used in controller
+     */
+    ControllerConfiguration.prototype.registerControllers = function () {
+        var controllers = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            controllers[_i] = arguments[_i];
+        }
+        controllers.forEach(this.registerController.bind(this));
+        return this;
+    };
     /**
      * Register route in controller
      * @param route - route used in controller
@@ -14,20 +36,19 @@ var ControllerConfiguration = /** @class */ (function () {
         return this;
     };
     /**
-     * Register array of _routes in controller
-     * @param routes - _routes used in controller
+     * Register array of routes in controller
+     * @param routes - routes used in controller
      */
     ControllerConfiguration.prototype.registerRoutes = function () {
-        var _this = this;
         var routes = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             routes[_i] = arguments[_i];
         }
-        routes.forEach(function (route) { return _this.registerRoute(route); });
+        routes.forEach(this.registerRoute.bind(this));
         return this;
     };
     /**
-     * Register controller prefix which will be used by all _routes
+     * Register controller prefix which will be used by all routes
      * @param prefix - eg: 'login'
      */
     ControllerConfiguration.prototype.prefix = function (prefix) {
@@ -39,6 +60,9 @@ var ControllerConfiguration = /** @class */ (function () {
     };
     ControllerConfiguration.prototype.getRoutes = function () {
         return this._routes;
+    };
+    ControllerConfiguration.prototype.getControllers = function () {
+        return this._controllers;
     };
     return ControllerConfiguration;
 }());

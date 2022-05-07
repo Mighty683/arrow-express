@@ -65,7 +65,7 @@ var AppConfigurator = /** @class */ (function () {
         else {
             this._started = true;
         }
-        this.registerControllersInExpress();
+        this.startControllers();
         this.startExpressApplication();
     };
     /**
@@ -81,12 +81,11 @@ var AppConfigurator = /** @class */ (function () {
      * @param controllers - controllers to register
      */
     AppConfigurator.prototype.registerControllers = function () {
-        var _this = this;
         var controllers = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             controllers[_i] = arguments[_i];
         }
-        controllers.forEach(function (controller) { return _this.registerController(controller); });
+        controllers.forEach(this.registerController);
         return this;
     };
     // PRIVATE
@@ -94,27 +93,33 @@ var AppConfigurator = /** @class */ (function () {
         var _this = this;
         this._express.listen(this.port, function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                console.log("App started on port " + this.port);
+                console.log("App started on port ".concat(this.port));
                 console.log('Routes registered by Express server:');
                 this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
                 return [2 /*return*/];
             });
         }); });
     };
-    AppConfigurator.prototype.registerControllersInExpress = function () {
+    AppConfigurator.prototype.startControllers = function () {
         var _this = this;
-        this._controllers.forEach(function (controller) {
-            controller.getRoutes().forEach(function (route) {
-                _this.registerRouteInExpress(controller, route);
-            });
+        this._controllers.forEach(function (controller) { return _this.startController(controller); });
+    };
+    AppConfigurator.prototype.startController = function (controller, prefix) {
+        var _this = this;
+        if (prefix === void 0) { prefix = ''; }
+        controller.getControllers().forEach((function (subController) {
+            _this.startController(subController, AppConfigurator.getRoutePath(controller.getPrefix(), prefix));
+        }));
+        controller.getRoutes().forEach(function (route) {
+            _this.registerRouteInExpress(controller, route, prefix);
         });
     };
-    AppConfigurator.prototype.registerRouteInExpress = function (controller, route) {
-        var routePath = AppConfigurator.getRoutePath(controller.getPrefix(), route.getPath());
+    AppConfigurator.prototype.registerRouteInExpress = function (controller, route, prefix) {
+        var routePath = AppConfigurator.getRoutePath(prefix, controller.getPrefix(), route.getPath());
         if (!route.getMethod()) {
-            throw new configuration_error_1.ConfigurationError("Route " + routePath + " has no method specified");
+            throw new configuration_error_1.ConfigurationError("Route ".concat(routePath, " has no method specified"));
         }
-        this._express[route.getMethod()](routePath, this.createApplicationRequestHandler(route.getRequestHandler()));
+        this._express[route.getMethod()]("/".concat(routePath), this.createApplicationRequestHandler(route.getRequestHandler()));
     };
     AppConfigurator.prototype.createApplicationRequestHandler = function (routeRequestHandler) {
         var _this = this;
@@ -159,7 +164,7 @@ var AppConfigurator = /** @class */ (function () {
     };
     AppConfigurator.prototype.logRequest = function (req, res) {
         if (this.logRequests) {
-            console.log("Request " + req.method + ":" + req.path + " Response: " + res.statusCode);
+            console.log("Request ".concat(req.method, ":").concat(req.path, " Response: ").concat(res.statusCode));
         }
     };
     AppConfigurator.prototype.getExpressRoutesAsStrings = function () {
@@ -170,18 +175,19 @@ var AppConfigurator = /** @class */ (function () {
     // STATIC
     AppConfigurator.expressRouteAsString = function (r) {
         var _a;
-        return Object.keys(r.route.methods)[0].toUpperCase() + ":" + ((_a = r.route) === null || _a === void 0 ? void 0 : _a.path);
+        return "".concat(Object.keys(r.route.methods)[0].toUpperCase(), ":").concat((_a = r.route) === null || _a === void 0 ? void 0 : _a.path);
     };
     /**
      * Get final route path
-     * @param prefix - prefix of route
-     * @param path - path
+     * @param paths - array of paths
      * @private
      */
-    AppConfigurator.getRoutePath = function (prefix, path) {
-        var prefixPath = prefix ? "/" + prefix : '/';
-        var routePath = path ? "" + (prefix ? "/" + path : path) : '';
-        return prefixPath + routePath;
+    AppConfigurator.getRoutePath = function () {
+        var paths = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            paths[_i] = arguments[_i];
+        }
+        return paths.filter(function (path) { return !!path; }).join("/");
     };
     AppConfigurator.isResponseAlreadyEnded = function (res) {
         return !res.writableEnded;

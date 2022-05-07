@@ -29,7 +29,8 @@ export declare class AppConfigurator {
      */
     registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator;
     private startExpressApplication;
-    private registerControllersInExpress;
+    private startControllers;
+    private startController;
     private registerRouteInExpress;
     private createApplicationRequestHandler;
     private logRequest;
@@ -37,8 +38,7 @@ export declare class AppConfigurator {
     private static expressRouteAsString;
     /**
      * Get final route path
-     * @param prefix - prefix of route
-     * @param path - path
+     * @param paths - array of paths
      * @private
      */
     private static getRoutePath;
