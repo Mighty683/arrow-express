@@ -996,10 +996,10 @@ array-unique@^0.3.2:
   resolved "https://registry.yarnpkg.com/array-unique/-/array-unique-0.3.2.tgz#a894b75d4bc4f6cd679ef3244a9fd8f46ae2d428"
   integrity sha1-qJS3XUvE9s1nnvMkSp/Y9Gri1Cg=
 
-arrow-express@0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/arrow-express/-/arrow-express-0.3.0.tgz#30be661bb831f1740b33485dd6e727141094688a"
-  integrity sha512-ZNl8xXnTfoCgydGIQLxj3bJVsQGA/yr1vYa9Y/8cPtW3cLT1Qs41+Nia2rmMaw5h1NSoMXNZx/VKENEwaxH8vA==
+arrow-express@0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/arrow-express/-/arrow-express-0.3.1.tgz#aefd8d6d18966551bdd74a76acb0f27f42aebe72"
+  integrity sha512-/OZeQ5j3LUnsJGCtWUJnTZWtxxQKNxCINh3JWpOIDoqAsiQlUDEcEZ6usJ0PeG+2cw6Hhc7mboH9pGBh2ghCWg==
 
 assign-symbols@^1.0.0:
   version "1.0.0"
