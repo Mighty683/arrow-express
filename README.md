@@ -13,96 +13,62 @@ To install package use command:
 
 `npm install arrow-express`
 
-## Example code
-
-```ts
-import Express from 'express';
-import Compression from 'compression';
-import cors from 'cors';
-
-import {Application, Controller, Route} from 'arrow-express';
-
-const ExpressApp = Express();
-  
-ExpressApp.use(Express.json());
-ExpressApp.use(Compression());
-ExpressApp.use(cors());
-
-Application({
-  port: 8080,
-  app: ExpressApp
-}).registerController(
-  Controller()
-    .prefix('users')
-    .registerRoutes(
-      Route()
-        .method('get')
-        .handler(
-          (req) => getUser(req.body.id)
-        ),
-      Route()
-        .method('post')
-        .path('create')
-        .handler(
-          (req) => createUser(req.body.id)
-        )
-    ),
-).start();
-/**
- * Created paths in express application:
- * GET:/users
- * POST:/users/create
- *
- * For full example application check out example folder.
- */
-```
 ## Docs
 ### Application
 
 Point of start for every application.
 Here you can configure Express application or port used by your application.
 
+#### Example usage of application
+
+```ts
+import Express from 'express';
+
+import {Application, Controller, Route} from 'arrow-express';
+
+const ExpressApp = Express();
+
+const application = Application({
+  port: 8080,
+  app: ExpressApp
+});
+
+application.start();
+```
 
 #### Application Methods
 
 - `registerController` - register controller in application.
-- `start` - starts application, register controllers routes in express app and connect to configured port
-
-#### Example usage of Application
-
-```ts
-Application({
-  port: 8080,
-  app: Express(),
-})
-.start();
-```
+- `start` - starts application, register controllers routes in express app and connect to configured port.
 
 ### Controller
 
-Controller is used to manage group of routes.
+Controller is used to manage group of routes under one prefix route.
 
 #### Example usage of Controller
 
 ```ts
 import {Application, Controller} from 'arrow-express';
 
-function LoginController () {
-  return Controller()
-    .prefix('login');
-}
-
 function UserController () {
   return Controller()
-    .prefix('user');
+    .prefix('user')
+    .registerRoute(
+      Route()
+        .method('get')
+        .handle((req, res) => {
+          // get user and response
+        })
+    );
 }
 
 Application({port: 8080})
   .registerControllers(
-    LoginController(),
     UserController(),
   )
   .start();
+
+// Registered path will be: GET '/user'
 ```
 
 #### Controller Methods
@@ -175,6 +141,18 @@ Route Guard receive 2 arguments:
 Route Guard can return context which can be used in handler later.
 If route guard throw error route handler won't be called.
 
+### Error handling
+
+If route handler or guard throws `RequestError` it will be handled by `arrow-express` and respond with http code and response object.
+
+```ts
+import {RequestError} from "arrow-express";
+
+throw new RequestError(401, {
+  code: 401,
+  message: 'Unauthorized'
+});
+```
 ### Advices
 
 Check out `example` folder for example code guidance.
