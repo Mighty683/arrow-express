@@ -1,7 +1,7 @@
 # This is example application
 You can test out this application for example with Postman.
 
-It has no database connection. We recommend use for example typeorm for this purpose.
+It has no database connection. We recommend use for example prisma for this purpose.
 
 # Default settings
 - Command to run app:

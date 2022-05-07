@@ -12,8 +12,6 @@ module.exports = {
   rules: {
     "indent": ["error", 2],
     "semi": ["error"],
-    "no-explicit-any": {
-      ignoreRestArgs: true,
-    }
+    "no-explicit-any": 0
   }
 };

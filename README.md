@@ -107,8 +107,11 @@ Application({port: 8080})
 
 #### Controller Methods
 
-- `prefix` - register controller prefix which will be used by all routes
-- `registerRoute` - register route in controller
+- `prefix(prefix)` - register controller prefix which will be used by all routes
+- `registerRoute(route)` - register route in controller
+- `registerRoutes(...routes)` - register multiple routes in controller
+- `registerController(controller)` - register sub controller in controller
+- `registerControllers(...controllers)` - register multiple sub controllers in controller
 
 ### Route
 
@@ -119,37 +122,25 @@ Route is used to manage route handling.
 ```ts
 import {Application, Controller, Route} from 'arrow-express';
 
-function CheckToken (): UserId {
-  // here we check if user is logged by proper token
-  return userId;
-}
-
-function getUserRoute() {
-  return Route()
-    .method('get')
-    .path('myself')
-    .contextGuard(CheckToken)
-    .handler(async (req: Express.Request, res: Express.Response, userId: UserId) => {
-      // here we can get user using UserId received from guard
-      return user;
-    });
-}
-
-function LoginController () {
-  return Controller()
-    .prefix('user')
-    .registerRoutes(
-      getUserRoute()
-  );
-}
 
 Application({port: 8080})
   .registerController(
-    LoginController(),
+    Controller()
+      .prefix('user')
+      .registerRoutes(
+        Route()
+          .method('get')
+          .path('myself')
+          .handler(async (req: Express.Request, res: Express.Response) => {
+            const user = {};
+            // Use some service to extract route
+            return user;
+          })
+      )
   )
   .start();
 
-// Registered path will be: '/user/myself'
+// Registered path will be: GET '/user/myself'
 ```
 
 #### Route Methods
@@ -183,3 +174,43 @@ Route Guard receive 2 arguments:
 
 Route Guard can return context which can be used in handler later.
 If route guard throw error route handler won't be called.
+
+### Advices
+
+Check out `example` folder for example code guidance.
+
+#### Use closures to structure services
+
+Good approach is to use function closures to organize code into chunks.
+
+Eg: create function which will return `Controller` and pass to it instance of service as argument instead of importing Singleton service.
+This way you will be able to test routes and controllers with ease without module mocking and you will avoid side effects.
+
+```ts
+// index.ts file
+async function startServer() {
+  const expressApplication = Express();
+  const userService = new UserService();
+
+  expressApplication.use(cors());
+  expressApplication.use(Compression());
+  expressApplication.use(Express.json());
+
+  Application({
+    port: 3000,
+    app: expressApplication
+  })
+    .registerController(UserController(userService))
+    .start();
+}
+
+// user.controller.ts file
+export function UserController(userService: UserService): ControllerConfiguration {
+  return Controller()
+    .prefix('users')
+    .registerRoutes(
+      GetUserById(userService),
+      GetMyselfRoute(userService)
+    );
+}
+```

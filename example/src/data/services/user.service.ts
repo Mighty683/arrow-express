@@ -1,7 +1,7 @@
 import { User } from '../entities/user.entity';
 
 /**
- * This is stub service we advise to use for example typeorm for database connection management.
+ * This is stub service we advise to use for example prisma for database connection management.
  */
 let stubUser: User = {
   id: 1, mail: "example@example.com", password_hash: "hash", role: "admin", user_name: "administrator"
