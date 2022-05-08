@@ -11,7 +11,9 @@ const ExpressAppStub: Express.Application = {
   use: jest.fn(),
   post: jest.fn(),
   get: jest.fn(),
-  listen: jest.fn(),
+  _router: {
+    stack: []
+  }
 } as unknown as Express.Application;
 
 
@@ -21,18 +23,18 @@ describe('Application', () => {
     mocked(ExpressAppStub.post).mockReset();
     mocked(ExpressAppStub.get).mockReset();
   });
-  describe('start', () => {
-    it('should throw error if app is started multiple times', () => {
-      const testApplication = Application({port: 8080, app: ExpressAppStub, logRequests: false});
+  describe('configure', () => {
+    it('should throw error if app is configured multiple times', () => {
+      const testApplication = Application({app: ExpressAppStub, logRequests: false});
 
-      testApplication.start();
+      testApplication.configure(false);
 
-      expect(testApplication.start). toThrow();
+      expect(testApplication.configure). toThrow();
     });
     describe('route registration', () => {
       it('should register post route', () => {
         const handlerSpy = jest.fn();
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller()
               .prefix('prefix')
@@ -42,13 +44,13 @@ describe('Application', () => {
                   .path('path')
                   .handler(handlerSpy)
               )
-          ).start();
+          ).configure(false);
         expect(ExpressAppStub.post).toHaveBeenCalledWith('/prefix/path', expect.any(Function));
       });
 
       it('should register get route', () => {
         const handlerSpy = jest.fn();
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller().prefix('prefix')
               .registerRoute(
@@ -57,13 +59,13 @@ describe('Application', () => {
                   .path('')
                   .handler(handlerSpy)
               )
-          ).start();
+          ).configure(false);
         expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
       });
 
       it('should register route without path', () => {
         const handlerSpy = jest.fn();
-        Application({port: 8080, app: ExpressAppStub})
+        Application({app: ExpressAppStub})
           .registerController(
             Controller().prefix('prefix')
               .registerRoute(
@@ -71,13 +73,13 @@ describe('Application', () => {
                   .method('get')
                   .handler(handlerSpy)
               )
-          ).start();
+          ).configure(false);
         expect(ExpressAppStub.get).toHaveBeenCalledWith('/prefix', expect.any(Function));
       });
 
       it('should register route without path and prefix', () => {
         const handlerSpy = jest.fn();
-        Application({port: 8080, app: ExpressAppStub})
+        Application({app: ExpressAppStub})
           .registerController(
             Controller()
               .registerRoute(
@@ -85,13 +87,13 @@ describe('Application', () => {
                   .method('get')
                   .handler(handlerSpy)
               )
-          ).start();
+          ).configure(false);
         expect(ExpressAppStub.get).toHaveBeenCalledWith('/', expect.any(Function));
       });
 
       it('should throw configuration error when route without method is registered', () => {
         const handlerSpy = jest.fn();
-        const app = Application({port: 8080, app: ExpressAppStub})
+        const app = Application({app: ExpressAppStub})
           .registerController(
             Controller().prefix('prefix')
               .registerRoute(
@@ -100,14 +102,14 @@ describe('Application', () => {
                   .handler(handlerSpy)
               )
           );
-        expect(() => app.start()).toThrow(ConfigurationError);
+        expect(() => app.configure(false)).toThrow(ConfigurationError);
       });
 
       describe('sub controllers', () => {
         it('should register sub controller route', () => {
 
           const handlerSpy = jest.fn();
-          Application({port: 8080, app: ExpressAppStub})
+          Application({app: ExpressAppStub})
             .registerController(
               Controller()
                 .prefix('root')
@@ -120,7 +122,7 @@ describe('Application', () => {
                         .handler(handlerSpy)
                     )
                 )
-            ).start();
+            ).configure(false);
           expect(ExpressAppStub.get).toHaveBeenCalledWith('/root/sub', expect.any(Function));
         });
       });
@@ -137,7 +139,7 @@ describe('Application', () => {
     });
     it('should response 200', async () => {
       const spy = jest.fn();
-      Application({port: 8080, app: ExpressAppStub, logRequests: false})
+      Application({app: ExpressAppStub, logRequests: false})
         .registerController(
           Controller()
             .registerRoute(
@@ -145,14 +147,14 @@ describe('Application', () => {
                 .method('get')
                 .handler(spy)
             )
-        ).start();
+        ).configure(false);
       await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).toHaveBeenCalledWith(200);
     });
     it('should not override statusCode', async () => {
       const spy = jest.fn();
       resSpy.statusCode = 301;
-      Application({port: 8080, app: ExpressAppStub, logRequests: false})
+      Application({app: ExpressAppStub, logRequests: false})
         .registerController(
           Controller()
             .registerRoute(
@@ -160,7 +162,7 @@ describe('Application', () => {
                 .method('get')
                 .handler(spy)
             )
-        ).start();
+        ).configure(false);
       await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).not.toHaveBeenCalledWith(200);
     });
@@ -168,7 +170,7 @@ describe('Application', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (resSpy.writableEnded as boolean) = true;
       const spy = jest.fn();
-      Application({port: 8080, app: ExpressAppStub, logRequests: false})
+      Application({app: ExpressAppStub, logRequests: false})
         .registerController(
           Controller()
             .registerRoute(
@@ -176,7 +178,7 @@ describe('Application', () => {
                 .method('get')
                 .handler(spy)
             )
-        ).start();
+        ).configure(false);
       await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
       expect(resSpy.status).not.toHaveBeenCalled();
     });
@@ -184,7 +186,7 @@ describe('Application', () => {
     describe('error handling', () => {
       it('should response code 500 by default', async () => {
         const spy = jest.fn().mockRejectedValue(new RequestError());
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller()
               .registerRoute(
@@ -192,13 +194,13 @@ describe('Application', () => {
                   .method('get')
                   .handler(spy)
               )
-          ).start();
+          ).configure(false);
         await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(resSpy.status).toHaveBeenCalledWith(500);
       });
       it('should response code 500 on non RequestError', async () => {
         const spy = jest.fn().mockRejectedValue(new Error());
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller()
               .registerRoute(
@@ -206,13 +208,13 @@ describe('Application', () => {
                   .method('get')
                   .handler(spy)
               )
-          ).start();
+          ).configure(false);
         await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(resSpy.status).toHaveBeenCalledWith(500);
       });
       it('should response 404', async () => {
         const spy = jest.fn().mockRejectedValue(new RequestError(404));
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller()
               .registerRoute(
@@ -220,7 +222,7 @@ describe('Application', () => {
                   .method('get')
                   .handler(spy)
               )
-          ).start();
+          ).configure(false);
         await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(resSpy.status).toHaveBeenCalledWith(404);
       });
@@ -230,7 +232,7 @@ describe('Application', () => {
           message: 'msg'
         };
         const spy = jest.fn().mockRejectedValue(new RequestError(401, response));
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller()
               .registerRoute(
@@ -238,7 +240,7 @@ describe('Application', () => {
                   .method('get')
                   .handler(spy)
               )
-          ).start();
+          ).configure(false);
         await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(resSpy.send).toHaveBeenCalledWith(response);
         expect(resSpy.status).toHaveBeenCalledWith(401);
@@ -247,7 +249,7 @@ describe('Application', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (resSpy.writableEnded as boolean) = true;
         const spy = jest.fn().mockRejectedValue(new Error());
-        Application({port: 8080, app: ExpressAppStub, logRequests: false})
+        Application({app: ExpressAppStub, logRequests: false})
           .registerController(
             Controller()
               .registerRoute(
@@ -255,7 +257,7 @@ describe('Application', () => {
                   .method('get')
                   .handler(spy)
               )
-          ).start();
+          ).configure(false);
         await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(resSpy.status).not.toHaveBeenCalled();
       });

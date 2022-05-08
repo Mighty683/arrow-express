@@ -10,14 +10,14 @@ export type UserContext = {
  */
 export const AuthorizeGuard = async (req: Express.Request): Promise<UserContext> => {
   const authHeader = req.headers.authorization;
-    const token = parseToken(authHeader);
+  const token = parseToken(authHeader);
   // Here place your token authorization
-    if (token === 'token')
-      return {
-        userId: 1
-      };
-    else
-      throw new RequestError(401);
+  if (token === 'token')
+    return {
+      userId: 1
+    };
+  else
+    throw new RequestError(401);
 };
 
 

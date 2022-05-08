@@ -19,11 +19,10 @@ async function startServer() {
   expressApplication.use(Express.json());
 
   Application({
-    port: 3000,
     app: expressApplication
   })
     .registerController(UserController(userService))
-    .start();
+    .configure();
 }
 
 startServer();

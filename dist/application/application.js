@@ -41,32 +41,34 @@ var request_error_1 = require("../error/request.error");
 var configuration_error_1 = require("../error/configuration.error");
 var AppConfigurator = /** @class */ (function () {
     /**
-     *
-     * @param port - port which will be used by application
+     * Create AppConfigurator
      * @param expressApplication - express application
      * @param logRequests - flag if requests should be logged, true by default
      */
-    function AppConfigurator(port, expressApplication, logRequests) {
+    function AppConfigurator(expressApplication, logRequests) {
         if (logRequests === void 0) { logRequests = true; }
         this._controllers = [];
         this._express = expressApplication;
-        this._started = false;
-        this.port = port;
+        this._configured = false;
         this.logRequests = logRequests;
     }
     /**
      * Starts application, register controllers routes in express app
      * and connect to configured port.
+     * @param printConfiguration - print express application routes enabled by default.
      */
-    AppConfigurator.prototype.start = function () {
-        if (this._started) {
-            throw new configuration_error_1.ConfigurationError('Cannot start application multiple times');
+    AppConfigurator.prototype.configure = function (printConfiguration) {
+        if (printConfiguration === void 0) { printConfiguration = true; }
+        if (this._configured) {
+            throw new configuration_error_1.ConfigurationError('Cannot configure application multiple times');
         }
         else {
-            this._started = true;
+            this._configured = true;
         }
         this.startControllers();
-        this.startExpressApplication();
+        if (printConfiguration) {
+            this.printExpressConfig();
+        }
     };
     /**
      * Register controller in application.
@@ -89,16 +91,9 @@ var AppConfigurator = /** @class */ (function () {
         return this;
     };
     // PRIVATE
-    AppConfigurator.prototype.startExpressApplication = function () {
-        var _this = this;
-        this._express.listen(this.port, function () { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                console.log("App started on port ".concat(this.port));
-                console.log('Routes registered by Express server:');
-                this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
-                return [2 /*return*/];
-            });
-        }); });
+    AppConfigurator.prototype.printExpressConfig = function () {
+        console.log('Routes registered by Express server:');
+        this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
     };
     AppConfigurator.prototype.startControllers = function () {
         var _this = this;
@@ -197,11 +192,10 @@ var AppConfigurator = /** @class */ (function () {
 exports.AppConfigurator = AppConfigurator;
 /**
  * Creates application core
- * @param options.port - port used by application
  * @param options.app - Express application used by application
  * @param options.logRequests - log requests, enabled by default
  */
 function Application(options) {
-    return new AppConfigurator(options.port, options.app, options.logRequests);
+    return new AppConfigurator(options.app, options.logRequests);
 }
 exports.Application = Application;

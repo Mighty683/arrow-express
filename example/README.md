@@ -5,7 +5,7 @@ It has no database connection. We recommend use for example prisma for this purp
 
 # Default settings
 - Command to run app:
-  - `npm install && npm run start:dev`
+  - `yarn install && yarn run start:dev`
 - App start at 3000 port
 - Default paths:
     - GET:/users/myself

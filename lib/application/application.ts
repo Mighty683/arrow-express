@@ -8,24 +8,20 @@ import {ConfigurationError} from "../error/configuration.error";
 export class AppConfigurator {
   private readonly _express: Express.Application
   private readonly _controllers: ControllerConfiguration[] = [];
-  private readonly port: number
   private readonly logRequests: boolean;
-  private _started: boolean
+  private _configured: boolean
 
   /**
-   *
-   * @param port - port which will be used by application
+   * Create AppConfigurator
    * @param expressApplication - express application
    * @param logRequests - flag if requests should be logged, true by default
    */
   constructor(
-    port: number,
     expressApplication: Express.Application,
     logRequests = true
   ) {
     this._express = expressApplication;
-    this._started = false;
-    this.port = port;
+    this._configured = false;
     this.logRequests = logRequests;
   }
 
@@ -33,15 +29,18 @@ export class AppConfigurator {
   /**
    * Starts application, register controllers routes in express app
    * and connect to configured port.
+   * @param printConfiguration - print express application routes enabled by default.
    */
-  start(): void {
-    if(this._started) {
-      throw new ConfigurationError('Cannot start application multiple times');
+  configure(printConfiguration = true): void {
+    if(this._configured) {
+      throw new ConfigurationError('Cannot configure application multiple times');
     } else {
-      this._started = true;
+      this._configured = true;
     }
     this.startControllers();
-    this.startExpressApplication();
+    if (printConfiguration) {
+      this.printExpressConfig();
+    }
   }
 
   /**
@@ -64,12 +63,9 @@ export class AppConfigurator {
 
   // PRIVATE
 
-  private startExpressApplication() {
-    this._express.listen(this.port, async () => {
-      console.log(`App started on port ${this.port}`);
-      console.log('Routes registered by Express server:');
-      this.getExpressRoutesAsStrings().forEach(route => console.log(route));
-    });
+  private printExpressConfig() {
+    console.log('Routes registered by Express server:');
+    this.getExpressRoutesAsStrings().forEach(route => console.log(route));
   }
 
   private startControllers() {
@@ -164,17 +160,15 @@ export class AppConfigurator {
 }
 
 type ApplicationOptions = {
-  port: number,
   app: Express.Application
   logRequests?: boolean
 }
 
 /**
  * Creates application core
- * @param options.port - port used by application
  * @param options.app - Express application used by application
  * @param options.logRequests - log requests, enabled by default
  */
 export function Application(options: ApplicationOptions): AppConfigurator {
-  return new AppConfigurator(options.port, options.app, options.logRequests);
+  return new AppConfigurator(options.app, options.logRequests);
 }

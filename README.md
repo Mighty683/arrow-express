@@ -29,17 +29,17 @@ import {Application, Controller, Route} from 'arrow-express';
 const ExpressApp = Express();
 
 const application = Application({
-  port: 8080,
   app: ExpressApp
 });
 
-application.start();
+application.configure();
+ExpressApp.listen(3000);
 ```
 
 #### Application Methods
 
 - `registerController` - register controller in application.
-- `start` - starts application, register controllers routes in express app and connect to configured port.
+- `configure` - register routes in express app.
 
 ### Controller
 
@@ -62,11 +62,13 @@ function UserController () {
     );
 }
 
-Application({port: 8080})
+Application({
+  app: ExpressApp
+})
   .registerControllers(
     UserController(),
   )
-  .start();
+  .configure();
 
 // Registered path will be: GET '/user'
 ```
@@ -89,7 +91,9 @@ Route is used to manage route handling.
 import {Application, Controller, Route} from 'arrow-express';
 
 
-Application({port: 8080})
+Application({
+  app: ExpressApp
+})
   .registerController(
     Controller()
       .prefix('user')
@@ -104,7 +108,7 @@ Application({port: 8080})
           })
       )
   )
-  .start();
+  .configure();
 
 // Registered path will be: GET '/user/myself'
 ```
@@ -170,16 +174,13 @@ async function startServer() {
   const expressApplication = Express();
   const userService = new UserService();
 
-  expressApplication.use(cors());
-  expressApplication.use(Compression());
-  expressApplication.use(Express.json());
-
   Application({
-    port: 3000,
     app: expressApplication
   })
     .registerController(UserController(userService))
-    .start();
+    .configure();
+  
+  expressApplication.listen(3000);
 }
 
 // user.controller.ts file
