@@ -17,7 +17,7 @@ To install package use command:
 ### Application
 
 Point of start for every application.
-Here you can configure Express application or port used by your application.
+It is used to register controllers and routes.
 
 #### Example usage of application
 
@@ -30,9 +30,19 @@ const ExpressApp = Express();
 
 const application = Application({
   app: ExpressApp
-});
-
-application.configure();
+})
+  .registerController(
+    Controller()
+      .prefix('user')
+      .registerRoute(
+        Route()
+          .method('get')
+          .handle(async (req, res) => {
+            // get user and response
+          })
+      )
+  )
+  .configure();
 ExpressApp.listen(3000);
 ```
 
