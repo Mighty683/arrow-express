@@ -23,6 +23,7 @@ async function startServer() {
   })
     .registerController(UserController(userService))
     .configure();
+  expressApplication.listen(3001);
 }
 
 startServer();

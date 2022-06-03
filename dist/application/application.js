@@ -83,11 +83,12 @@ var AppConfigurator = /** @class */ (function () {
      * @param controllers - controllers to register
      */
     AppConfigurator.prototype.registerControllers = function () {
+        var _this = this;
         var controllers = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             controllers[_i] = arguments[_i];
         }
-        controllers.forEach(this.registerController);
+        controllers.forEach(function (controller) { return _this.registerController(controller); });
         return this;
     };
     // PRIVATE

@@ -57,7 +57,7 @@ export class AppConfigurator {
    * @param controllers - controllers to register
    */
   registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator {
-    controllers.forEach(this.registerController);
+    controllers.forEach(controller => this.registerController(controller));
     return this;
   }
 
