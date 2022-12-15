@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -60,7 +60,7 @@ var AppConfigurator = /** @class */ (function () {
     AppConfigurator.prototype.configure = function (printConfiguration) {
         if (printConfiguration === void 0) { printConfiguration = true; }
         if (this._configured) {
-            throw new configuration_error_1.ConfigurationError('Cannot configure application multiple times');
+            throw new configuration_error_1.ConfigurationError("Cannot configure application multiple times");
         }
         else {
             this._configured = true;
@@ -93,7 +93,7 @@ var AppConfigurator = /** @class */ (function () {
     };
     // PRIVATE
     AppConfigurator.prototype.printExpressConfig = function () {
-        console.log('Routes registered by Express server:');
+        console.log("Routes registered by Express server:");
         this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
     };
     AppConfigurator.prototype.startControllers = function () {
@@ -102,10 +102,10 @@ var AppConfigurator = /** @class */ (function () {
     };
     AppConfigurator.prototype.startController = function (controller, prefix) {
         var _this = this;
-        if (prefix === void 0) { prefix = ''; }
-        controller.getControllers().forEach((function (subController) {
+        if (prefix === void 0) { prefix = ""; }
+        controller.getControllers().forEach(function (subController) {
             _this.startController(subController, AppConfigurator.getRoutePath(controller.getPrefix(), prefix));
-        }));
+        });
         controller.getRoutes().forEach(function (route) {
             _this.registerRouteInExpress(controller, route, prefix);
         });
@@ -139,12 +139,14 @@ var AppConfigurator = /** @class */ (function () {
                         error_1 = _a.sent();
                         if (AppConfigurator.isResponseAlreadyEnded(res)) {
                             if (error_1 instanceof request_error_1.RequestError) {
-                                res.status(error_1.httpCode || 500).send(error_1.response || 'Internal error');
+                                res
+                                    .status(error_1.httpCode || 500)
+                                    .send(error_1.response || "Internal error");
                             }
                             else {
-                                res.status(500).send('Internal error');
+                                res.status(500).send("Internal error");
                                 if (this.logRequests) {
-                                    console.error('Internal error');
+                                    console.error("Internal error");
                                     console.error(error_1);
                                 }
                             }
@@ -160,7 +162,7 @@ var AppConfigurator = /** @class */ (function () {
     };
     AppConfigurator.prototype.logRequest = function (req, res) {
         if (this.logRequests) {
-            console.log("Request ".concat(req.method, ":").concat(req.path, " Response: ").concat(res.statusCode));
+            console.log("Request ".concat(req.method, ":").concat(req.path, " Response status: ").concat(res.statusCode));
         }
     };
     AppConfigurator.prototype.getExpressRoutesAsStrings = function () {

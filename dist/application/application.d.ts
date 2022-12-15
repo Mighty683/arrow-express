@@ -1,5 +1,5 @@
-import Express from 'express';
-import { ControllerConfiguration } from '../controller/controller';
+import Express from "express";
+import { ControllerConfiguration } from "../controller/controller";
 export declare class AppConfigurator {
     private readonly _express;
     private readonly _controllers;
@@ -43,7 +43,7 @@ export declare class AppConfigurator {
     private static getRoutePath;
     private static isResponseAlreadyEnded;
 }
-declare type ApplicationOptions = {
+type ApplicationOptions = {
     app: Express.Application;
     logRequests?: boolean;
 };

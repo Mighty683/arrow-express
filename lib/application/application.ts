@@ -1,30 +1,26 @@
-import Express from 'express';
+import Express from "express";
 
-import {ControllerConfiguration} from '../controller/controller';
-import {RequestHandler, RouteConfigurator} from '../route/route';
-import {RequestError} from '../error/request.error';
-import {ConfigurationError} from "../error/configuration.error";
+import { ControllerConfiguration } from "../controller/controller";
+import { RequestHandler, RouteConfigurator } from "../route/route";
+import { RequestError } from "../error/request.error";
+import { ConfigurationError } from "../error/configuration.error";
 
 export class AppConfigurator {
-  private readonly _express: Express.Application
+  private readonly _express: Express.Application;
   private readonly _controllers: ControllerConfiguration[] = [];
   private readonly logRequests: boolean;
-  private _configured: boolean
+  private _configured: boolean;
 
   /**
    * Create AppConfigurator
    * @param expressApplication - express application
    * @param logRequests - flag if requests should be logged, true by default
    */
-  constructor(
-    expressApplication: Express.Application,
-    logRequests = true
-  ) {
+  constructor(expressApplication: Express.Application, logRequests = true) {
     this._express = expressApplication;
     this._configured = false;
     this.logRequests = logRequests;
   }
-
 
   /**
    * Starts application, register controllers routes in express app
@@ -32,8 +28,10 @@ export class AppConfigurator {
    * @param printConfiguration - print express application routes enabled by default.
    */
   configure(printConfiguration = true): void {
-    if(this._configured) {
-      throw new ConfigurationError('Cannot configure application multiple times');
+    if (this._configured) {
+      throw new ConfigurationError(
+        "Cannot configure application multiple times"
+      );
     } else {
       this._configured = true;
     }
@@ -56,7 +54,9 @@ export class AppConfigurator {
    * Register list of controllers in application.
    * @param controllers - controllers to register
    */
-  registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator {
+  registerControllers(
+    ...controllers: ControllerConfiguration[]
+  ): AppConfigurator {
     controllers.forEach(controller => this.registerController(controller));
     return this;
   }
@@ -64,7 +64,7 @@ export class AppConfigurator {
   // PRIVATE
 
   private printExpressConfig() {
-    console.log('Routes registered by Express server:');
+    console.log("Routes registered by Express server:");
     this.getExpressRoutesAsStrings().forEach(route => console.log(route));
   }
 
@@ -72,23 +72,33 @@ export class AppConfigurator {
     this._controllers.forEach(controller => this.startController(controller));
   }
 
-  private startController(controller: ControllerConfiguration, prefix = '') {
-    controller.getControllers().forEach((subController => {
-      this.startController(subController, AppConfigurator.getRoutePath(controller.getPrefix(), prefix));
-    }));
+  private startController(controller: ControllerConfiguration, prefix = "") {
+    controller.getControllers().forEach(subController => {
+      this.startController(
+        subController,
+        AppConfigurator.getRoutePath(controller.getPrefix(), prefix)
+      );
+    });
     controller.getRoutes().forEach(route => {
       this.registerRouteInExpress(controller, route, prefix);
     });
   }
 
-  private registerRouteInExpress(controller: ControllerConfiguration, route: RouteConfigurator, prefix?: string) {
+  private registerRouteInExpress(
+    controller: ControllerConfiguration,
+    route: RouteConfigurator,
+    prefix?: string
+  ) {
     const routePath = AppConfigurator.getRoutePath(
       prefix,
       controller.getPrefix(),
-      route.getPath());
+      route.getPath()
+    );
 
     if (!route.getMethod()) {
-      throw new ConfigurationError(`Route ${routePath} has no method specified`);
+      throw new ConfigurationError(
+        `Route ${routePath} has no method specified`
+      );
     }
 
     this._express[route.getMethod()](
@@ -97,7 +107,9 @@ export class AppConfigurator {
     );
   }
 
-  private createApplicationRequestHandler(routeRequestHandler: RequestHandler): Express.RequestHandler {
+  private createApplicationRequestHandler(
+    routeRequestHandler: RequestHandler
+  ): Express.RequestHandler {
     return async (req: Express.Request, res: Express.Response) => {
       try {
         const response = await routeRequestHandler(req, res);
@@ -107,14 +119,16 @@ export class AppConfigurator {
           }
           res.send(response);
         }
-      } catch(error) {
+      } catch (error) {
         if (AppConfigurator.isResponseAlreadyEnded(res)) {
           if (error instanceof RequestError) {
-            res.status(error.httpCode || 500).send(error.response || 'Internal error');
+            res
+              .status(error.httpCode || 500)
+              .send(error.response || "Internal error");
           } else {
-            res.status(500).send('Internal error');
+            res.status(500).send("Internal error");
             if (this.logRequests) {
-              console.error('Internal error');
+              console.error("Internal error");
               console.error(error);
             }
           }
@@ -127,7 +141,9 @@ export class AppConfigurator {
 
   private logRequest(req: Express.Request, res: Express.Response) {
     if (this.logRequests) {
-      console.log(`Request ${req.method}:${req.path} Response: ${res.statusCode}`);
+      console.log(
+        `Request ${req.method}:${req.path} Response status: ${res.statusCode}`
+      );
     }
   }
 
@@ -138,12 +154,9 @@ export class AppConfigurator {
   }
   // STATIC
 
-
-
   private static expressRouteAsString(r) {
     return `${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`;
   }
-
 
   /**
    * Get final route path
@@ -160,9 +173,9 @@ export class AppConfigurator {
 }
 
 type ApplicationOptions = {
-  app: Express.Application
-  logRequests?: boolean
-}
+  app: Express.Application;
+  logRequests?: boolean;
+};
 
 /**
  * Creates application core

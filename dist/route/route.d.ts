@@ -1,8 +1,8 @@
 import Express from 'express';
-export declare type RouteHandler<Context> = (request: Express.Request, response: Express.Response, context: Context) => unknown;
-export declare type RequestHandler = (request: Express.Request, response: Express.Response) => unknown;
-export declare type ContextGuard<Context> = (request: Express.Request, response: Express.Response) => Promise<Context> | Context | void;
-export declare type HttpMethod = 'get' | 'post' | 'head' | 'put' | 'delete' | 'options' | 'patch';
+export type RouteHandler<Context> = (request: Express.Request, response: Express.Response, context: Context) => unknown;
+export type RequestHandler = (request: Express.Request, response: Express.Response) => unknown;
+export type ContextGuard<Context> = (request: Express.Request, response: Express.Response) => Promise<Context> | Context | void;
+export type HttpMethod = 'get' | 'post' | 'head' | 'put' | 'delete' | 'options' | 'patch';
 export declare class RouteConfigurator<Context = unknown> {
     private _method;
     private _path;
