@@ -127,10 +127,6 @@ export class AppConfigurator {
               .send(error.response || "Internal error");
           } else {
             res.status(500).send("Internal error");
-            if (this.logRequests) {
-              console.error("Internal error");
-              console.error(error);
-            }
           }
         }
       } finally {

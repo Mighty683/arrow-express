@@ -145,10 +145,6 @@ var AppConfigurator = /** @class */ (function () {
                             }
                             else {
                                 res.status(500).send("Internal error");
-                                if (this.logRequests) {
-                                    console.error("Internal error");
-                                    console.error(error_1);
-                                }
                             }
                         }
                         return [3 /*break*/, 4];
