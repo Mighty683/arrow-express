@@ -3,17 +3,20 @@
 Aim of this library is to make express applications bootstrapping easy and fast with zero configuration.
 
 Main principles:
+
 - Use arrow functions :)
 - Avoid adding complex configuration, lib will work out of the box
 - Focus on clean functional programming, avoid usage of complex additional configuration ideas like decorators etc.
 - Flexibility and ease of use
 
 ## Installation
+
 To install package use command:
 
 `npm install arrow-express`
 
 ## Docs
+
 ### Application
 
 Point of start for every application.
@@ -22,21 +25,21 @@ It is used to register controllers and routes.
 #### Example usage of application
 
 ```ts
-import Express from 'express';
+import Express from "express";
 
-import {Application, Controller, Route} from 'arrow-express';
+import { Application, Controller, Route } from "arrow-express";
 
 const ExpressApp = Express();
 
 const application = Application({
-  app: ExpressApp
+  app: ExpressApp,
 })
   .registerController(
     Controller()
-      .prefix('user')
+      .prefix("user")
       .registerRoute(
         Route()
-          .method('get')
+          .method("get")
           .handle(async (req, res) => {
             // get user and response
           })
@@ -58,14 +61,14 @@ Controller is used to manage group of routes under one prefix route.
 #### Example usage of Controller
 
 ```ts
-import {Application, Controller} from 'arrow-express';
+import { Application, Controller } from "arrow-express";
 
-function UserController () {
+function UserController() {
   return Controller()
-    .prefix('user')
+    .prefix("user")
     .registerRoute(
       Route()
-        .method('get')
+        .method("get")
         .handle((req, res) => {
           // get user and response
         })
@@ -73,11 +76,9 @@ function UserController () {
 }
 
 Application({
-  app: ExpressApp
+  app: ExpressApp,
 })
-  .registerControllers(
-    UserController(),
-  )
+  .registerControllers(UserController())
   .configure();
 
 // Registered path will be: GET '/user'
@@ -98,19 +99,18 @@ Route is used to manage route handling.
 ### Example usage of route
 
 ```ts
-import {Application, Controller, Route} from 'arrow-express';
-
+import { Application, Controller, Route } from "arrow-express";
 
 Application({
-  app: ExpressApp
+  app: ExpressApp,
 })
   .registerController(
     Controller()
-      .prefix('user')
+      .prefix("user")
       .registerRoutes(
         Route()
-          .method('get')
-          .path('myself')
+          .method("get")
+          .path("myself")
           .handler(async (req: Express.Request, res: Express.Response) => {
             const user = {};
             // Use some service to extract route
@@ -128,7 +128,6 @@ Application({
 - `method` - register method used for route
 - `path` - register path of route alongside with prefix it is used to create full path
 - `handler` - set request handler, here you can handle request
-- `contextGuard` - used to add pre-checks or side operations for request if guard throw error, handler is not called
 
 #### Route handler
 
@@ -136,37 +135,27 @@ Route handler receive 3 arguments:
 
 - `request` - which is Express.Request for path
 - `response` - which is Express.Response
-- `context` - which is optional context returned by last guard
 
 Features of route handler:
+
 - Route handler can return Promise or Object which will be send back with response code 200.
 - Route handler can also send response itself using `res` then library won't try to send result pf handler.
 - Route handler can also setup custom response code then arrow-express won't override it.
 - If route handler will throw RequestError, RequestError will be used to send back desired response.
 
-
-#### Route Guard
-
-Route Guard receive 2 arguments:
-
-- `request` - which is Express.Request for path
-- `response` - which is Express.Response
-
-Route Guard can return context which can be used in handler later.
-If route guard throw error route handler won't be called.
-
 ### Error handling
 
-If route handler or guard throws `RequestError` it will be handled by `arrow-express` and respond with http code and response object.
+If route handler throws `RequestError` it will be handled by `arrow-express` and respond with http code and response object.
 
 ```ts
-import {RequestError} from "arrow-express";
+import { RequestError } from "arrow-express";
 
 throw new RequestError(401, {
   code: 401,
-  message: 'Unauthorized'
+  message: "Unauthorized",
 });
 ```
+
 ### Advices
 
 Check out `example` folder for example code guidance.
@@ -185,21 +174,16 @@ async function startServer() {
   const userService = new UserService();
 
   Application({
-    app: expressApplication
+    app: expressApplication,
   })
     .registerController(UserController(userService))
     .configure();
-  
+
   expressApplication.listen(3000);
 }
 
 // user.controller.ts file
 export function UserController(userService: UserService): ControllerConfiguration {
-  return Controller()
-    .prefix('users')
-    .registerRoutes(
-      GetUserById(userService),
-      GetMyselfRoute(userService)
-    );
+  return Controller().prefix("users").registerRoutes(GetUserById(userService), GetMyselfRoute(userService));
 }
 ```

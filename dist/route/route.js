@@ -45,7 +45,7 @@ var RouteConfigurator = /** @class */ (function () {
      * @param method - Method
      */
     RouteConfigurator.prototype.method = function (method) {
-        this._method = method || 'get';
+        this._method = method || "get";
         return this;
     };
     /**
@@ -54,14 +54,6 @@ var RouteConfigurator = /** @class */ (function () {
      */
     RouteConfigurator.prototype.path = function (path) {
         this._path = path;
-        return this;
-    };
-    /**
-     * Used to add pre-checks or side operations for request if guard throw error, handler is not called
-     * @param guard - ContextGuard returning context used by handler
-     */
-    RouteConfigurator.prototype.contextGuard = function (guard) {
-        this._contextGuard = guard;
         return this;
     };
     /**
@@ -85,20 +77,8 @@ var RouteConfigurator = /** @class */ (function () {
     RouteConfigurator.prototype.getRequestHandler = function () {
         var _this = this;
         return function (request, response) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        _a = this._handler;
-                        _b = [request, response];
-                        _c = this._contextGuard;
-                        if (!_c) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this._contextGuard(request, response)];
-                    case 1:
-                        _c = (_d.sent());
-                        _d.label = 2;
-                    case 2: return [2 /*return*/, _a.apply(this, _b.concat([_c]))];
-                }
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this._handler(request, response)];
             });
         }); };
     };
