@@ -128,7 +128,7 @@ var AppConfigurator = /** @class */ (function () {
                         return [4 /*yield*/, routeRequestHandler(req, res)];
                     case 1:
                         response = _a.sent();
-                        if (AppConfigurator.isResponseAlreadyEnded(res)) {
+                        if (AppConfigurator.canSendResponse(res)) {
                             if (!res.statusCode) {
                                 res.status(200);
                             }
@@ -137,11 +137,9 @@ var AppConfigurator = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 2:
                         error_1 = _a.sent();
-                        if (AppConfigurator.isResponseAlreadyEnded(res)) {
+                        if (AppConfigurator.canSendResponse(res)) {
                             if (error_1 instanceof request_error_1.RequestError) {
-                                res
-                                    .status(error_1.httpCode || 500)
-                                    .send(error_1.response || "Internal error");
+                                res.status(error_1.httpCode || 500).send(error_1.response || "Internal error");
                             }
                             else {
                                 res.status(500).send("Internal error");
@@ -162,9 +160,7 @@ var AppConfigurator = /** @class */ (function () {
         }
     };
     AppConfigurator.prototype.getExpressRoutesAsStrings = function () {
-        return this._express._router.stack
-            .filter(function (r) { return r.route; })
-            .map(AppConfigurator.expressRouteAsString);
+        return this._express._router.stack.filter(function (r) { return r.route; }).map(AppConfigurator.expressRouteAsString);
     };
     // STATIC
     AppConfigurator.expressRouteAsString = function (r) {
@@ -183,7 +179,7 @@ var AppConfigurator = /** @class */ (function () {
         }
         return paths.filter(function (path) { return !!path; }).join("/");
     };
-    AppConfigurator.isResponseAlreadyEnded = function (res) {
+    AppConfigurator.canSendResponse = function (res) {
         return !res.writableEnded;
     };
     return AppConfigurator;

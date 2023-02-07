@@ -41,7 +41,7 @@ export declare class AppConfigurator {
      * @private
      */
     private static getRoutePath;
-    private static isResponseAlreadyEnded;
+    private static canSendResponse;
 }
 type ApplicationOptions = {
     app: Express.Application;
