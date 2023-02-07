@@ -2,9 +2,9 @@ import { Route, RouteConfigurator } from "arrow-express";
 
 import { User } from "../../../data/entities/user.entity";
 import { UserService } from "../../../data/services/user.service";
-import { AuthorizeGuard, UserContext } from "../../guards/authorize.guard";
+import { AuthorizeGuard } from "../../guards/authorize.guard";
 
-export function GetUserById(userService: UserService): RouteConfigurator {
+export function GetUserByIdRoute(userService: UserService): RouteConfigurator {
   return Route()
     .method("get")
     .path(":id")

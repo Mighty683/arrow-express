@@ -46,6 +46,7 @@ const application = Application({
       )
   )
   .configure();
+
 ExpressApp.listen(3000);
 ```
 
