@@ -87,6 +87,7 @@ Application({
 
 #### Controller Methods
 
+- `handler(handler)` - register controller handler which will be used by all routes
 - `prefix(prefix)` - register controller prefix which will be used by all routes
 - `registerRoute(route)` - register route in controller
 - `registerRoutes(...routes)` - register multiple routes in controller
