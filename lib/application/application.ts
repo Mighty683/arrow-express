@@ -1,7 +1,7 @@
 import Express from "express";
 
 import { ControllerConfiguration } from "../controller/controller";
-import { RequestHandler, RouteConfigurator } from "../route/route";
+import { RouteHandler, RouteConfigurator } from "../route/route";
 import { RequestError } from "../error/request.error";
 import { ConfigurationError } from "../error/configuration.error";
 
@@ -84,13 +84,17 @@ export class AppConfigurator {
       throw new ConfigurationError(`Route ${routePath} has no method specified`);
     }
 
-    this._express[route.getMethod()](`/${routePath}`, this.createApplicationRequestHandler(route.getRequestHandler()));
+    this._express[route.getMethod()](`/${routePath}`, this.createApplicationRequestHandler(route, controller));
   }
 
-  private createApplicationRequestHandler(routeRequestHandler: RequestHandler): Express.RequestHandler {
+  private createApplicationRequestHandler(
+    route: RouteConfigurator,
+    controller: ControllerConfiguration
+  ): Express.RequestHandler {
     return async (req: Express.Request, res: Express.Response) => {
       try {
-        const response = await routeRequestHandler(req, res);
+        const context = await controller.getHandler()?.(req, res);
+        const response = await route.getRequestHandler()(req, res, context);
         if (AppConfigurator.canSendResponse(res)) {
           if (!res.statusCode) {
             res.status(200);

@@ -1,14 +1,14 @@
 // Express packages
-import Express from 'express';
-import Compression from 'compression';
-import cors from 'cors';
+import Express from "express";
+import Compression from "compression";
+import cors from "cors";
 
 // Api packages
-import {Application} from "arrow-express";
-import {UserController} from "./api/user/user.controller";
+import { Application } from "arrow-express";
+import { UserController } from "./api/user/user.controller";
 
 // Data packages
-import { UserService } from './data/services/user.service';
+import { UserService } from "./data/services/user.service";
 
 async function startServer() {
   const expressApplication = Express();
@@ -19,7 +19,7 @@ async function startServer() {
   expressApplication.use(Express.json());
 
   Application({
-    app: expressApplication
+    app: expressApplication,
   })
     .registerController(UserController(userService))
     .configure();

@@ -115,28 +115,32 @@ var AppConfigurator = /** @class */ (function () {
         if (!route.getMethod()) {
             throw new configuration_error_1.ConfigurationError("Route ".concat(routePath, " has no method specified"));
         }
-        this._express[route.getMethod()]("/".concat(routePath), this.createApplicationRequestHandler(route.getRequestHandler()));
+        this._express[route.getMethod()]("/".concat(routePath), this.createApplicationRequestHandler(route, controller));
     };
-    AppConfigurator.prototype.createApplicationRequestHandler = function (routeRequestHandler) {
+    AppConfigurator.prototype.createApplicationRequestHandler = function (route, controller) {
         var _this = this;
         return function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var response, error_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var context, response, error_1;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        _a.trys.push([0, 2, 3, 4]);
-                        return [4 /*yield*/, routeRequestHandler(req, res)];
+                        _b.trys.push([0, 3, 4, 5]);
+                        return [4 /*yield*/, ((_a = controller.getHandler()) === null || _a === void 0 ? void 0 : _a(req, res))];
                     case 1:
-                        response = _a.sent();
+                        context = _b.sent();
+                        return [4 /*yield*/, route.getRequestHandler()(req, res, context)];
+                    case 2:
+                        response = _b.sent();
                         if (AppConfigurator.canSendResponse(res)) {
                             if (!res.statusCode) {
                                 res.status(200);
                             }
                             res.send(response);
                         }
-                        return [3 /*break*/, 4];
-                    case 2:
-                        error_1 = _a.sent();
+                        return [3 /*break*/, 5];
+                    case 3:
+                        error_1 = _b.sent();
                         if (AppConfigurator.canSendResponse(res)) {
                             if (error_1 instanceof request_error_1.RequestError) {
                                 res.status(error_1.httpCode || 500).send(error_1.response || "Internal error");
@@ -145,11 +149,11 @@ var AppConfigurator = /** @class */ (function () {
                                 res.status(500).send("Internal error");
                             }
                         }
-                        return [3 /*break*/, 4];
-                    case 3:
+                        return [3 /*break*/, 5];
+                    case 4:
                         this.logRequest(req, res);
                         return [7 /*endfinally*/];
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         }); };

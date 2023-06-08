@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Controller = exports.ControllerConfiguration = void 0;
 var ControllerConfiguration = /** @class */ (function () {
     function ControllerConfiguration() {
-        this._prefix = '';
+        this._prefix = "";
         this._controllers = [];
         this._routes = [];
     }
@@ -55,6 +55,14 @@ var ControllerConfiguration = /** @class */ (function () {
         this._prefix = prefix;
         return this;
     };
+    /**
+     * Register controller handler which will be used by all routes
+     * @param handler - ControllerHandler function
+     */
+    ControllerConfiguration.prototype.handler = function (handler) {
+        this._handler = handler;
+        return this;
+    };
     ControllerConfiguration.prototype.getPrefix = function () {
         return this._prefix;
     };
@@ -63,6 +71,9 @@ var ControllerConfiguration = /** @class */ (function () {
     };
     ControllerConfiguration.prototype.getControllers = function () {
         return this._controllers;
+    };
+    ControllerConfiguration.prototype.getHandler = function () {
+        return this._handler;
     };
     return ControllerConfiguration;
 }());

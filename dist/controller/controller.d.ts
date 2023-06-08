@@ -1,35 +1,43 @@
-import { RouteConfigurator } from '../route/route';
-export declare class ControllerConfiguration {
+import { RouteConfigurator } from "../route/route";
+export type ControllerHandler<C> = (request: any, response: any) => Promise<C>;
+export declare class ControllerConfiguration<C = unknown> {
     private _prefix;
     private _controllers;
     private _routes;
+    private _handler;
     /**
      * Register child controller in controller
      * @param controller - controller to register
      */
-    registerController(controller: ControllerConfiguration): ControllerConfiguration;
+    registerController(controller: ControllerConfiguration): this;
     /**
      * Register array of controllers in controller
      * @param controllers - routes used in controller
      */
-    registerControllers(...controllers: ControllerConfiguration[]): ControllerConfiguration;
+    registerControllers(...controllers: ControllerConfiguration[]): this;
     /**
      * Register route in controller
      * @param route - route used in controller
      */
-    registerRoute(route: RouteConfigurator): ControllerConfiguration;
+    registerRoute(route: RouteConfigurator<C>): this;
     /**
      * Register array of routes in controller
      * @param routes - routes used in controller
      */
-    registerRoutes(...routes: RouteConfigurator[]): ControllerConfiguration;
+    registerRoutes(...routes: RouteConfigurator<C>[]): this;
     /**
      * Register controller prefix which will be used by all routes
      * @param prefix - eg: 'login'
      */
-    prefix(prefix: string): ControllerConfiguration;
+    prefix(prefix: string): this;
+    /**
+     * Register controller handler which will be used by all routes
+     * @param handler - ControllerHandler function
+     */
+    handler<NewContext>(handler: ControllerHandler<NewContext>): ControllerConfiguration<NewContext>;
     getPrefix(): string;
-    getRoutes(): RouteConfigurator[];
+    getRoutes(): RouteConfigurator<C>[];
     getControllers(): ControllerConfiguration[];
+    getHandler(): ControllerHandler<C> | undefined;
 }
-export declare function Controller(): ControllerConfiguration;
+export declare function Controller<C = unknown>(): ControllerConfiguration<C>;
