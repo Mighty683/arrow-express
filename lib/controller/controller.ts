@@ -1,7 +1,7 @@
 import { RouteConfigurator } from "../route/route";
 
 export type ControllerHandler<C> = (request: any, response: any) => Promise<C>;
-export class ControllerConfiguration<C = unknown> {
+export class ControllerConfiguration<C = undefined> {
   private _prefix = "";
   private _controllers: ControllerConfiguration[] = [];
   private _routes: RouteConfigurator<C>[] = [];
