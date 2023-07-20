@@ -1,5 +1,5 @@
 import { RouteConfigurator } from "../route/route";
-export type ControllerHandler<C> = (request: any, response: any) => Promise<C>;
+export type ControllerHandler<C = undefined> = (request: any, response: any) => Promise<C>;
 export declare class ControllerConfiguration<C = undefined> {
     private _prefix;
     private _controllers;
@@ -40,4 +40,4 @@ export declare class ControllerConfiguration<C = undefined> {
     getControllers(): ControllerConfiguration[];
     getHandler(): ControllerHandler<C> | undefined;
 }
-export declare function Controller<C = unknown>(): ControllerConfiguration<C>;
+export declare function Controller<C = undefined>(): ControllerConfiguration<C>;

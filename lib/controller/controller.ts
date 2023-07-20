@@ -1,6 +1,6 @@
 import { RouteConfigurator } from "../route/route";
 
-export type ControllerHandler<C> = (request: any, response: any) => Promise<C>;
+export type ControllerHandler<C = undefined> = (request: any, response: any) => Promise<C>;
 export class ControllerConfiguration<C = undefined> {
   private _prefix = "";
   private _controllers: ControllerConfiguration[] = [];
@@ -77,6 +77,6 @@ export class ControllerConfiguration<C = undefined> {
   }
 }
 
-export function Controller<C = unknown>(): ControllerConfiguration<C> {
+export function Controller<C = undefined>(): ControllerConfiguration<C> {
   return new ControllerConfiguration<C>();
 }
