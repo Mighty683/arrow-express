@@ -1,13 +1,13 @@
 import Express from "express";
 
 import { ControllerConfiguration } from "../controller/controller";
-import { RouteHandler, RouteConfigurator } from "../route/route";
+import { RouteConfigurator } from "../route/route";
 import { RequestError } from "../error/request.error";
 import { ConfigurationError } from "../error/configuration.error";
 
 export class AppConfigurator {
   private readonly _express: Express.Application;
-  private readonly _controllers: ControllerConfiguration[] = [];
+  private readonly _controllers: ControllerConfiguration<any>[] = [];
   private readonly logRequests: boolean;
   private _configured: boolean;
 
@@ -43,7 +43,7 @@ export class AppConfigurator {
    * Register controller in application.
    * @param controller - registered controller
    */
-  registerController(controller: ControllerConfiguration): AppConfigurator {
+  registerController(controller: ControllerConfiguration<any>): AppConfigurator {
     this._controllers.push(controller);
     return this;
   }
@@ -52,7 +52,7 @@ export class AppConfigurator {
    * Register list of controllers in application.
    * @param controllers - controllers to register
    */
-  registerControllers(...controllers: ControllerConfiguration[]): AppConfigurator {
+  registerControllers(...controllers: ControllerConfiguration<any>[]): AppConfigurator {
     controllers.forEach(controller => this.registerController(controller));
     return this;
   }
