@@ -1,5 +1,6 @@
 import { RouteConfigurator } from "../route/route";
-export type ControllerHandler<C = undefined> = (request: any, response: any) => Promise<C>;
+import Express from "express";
+export type ControllerHandler<C = undefined> = (request: Express.Request, response: Express.Response) => Promise<C>;
 export declare class ControllerConfiguration<C = undefined> {
     private _prefix;
     private _controllers;

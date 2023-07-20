@@ -1,6 +1,6 @@
 {
   "name": "arrow-express",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Library to bootstrap express applications with zero configuration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

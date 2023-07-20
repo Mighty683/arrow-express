@@ -7,8 +7,8 @@ describe("Route", () => {
   describe("Request handle configuration", () => {
     it("should call handler", () => {
       const spy = jest.fn();
-      Route().handler(spy).getRequestHandler()(req, res);
-      expect(spy).toHaveBeenCalledWith(req, res);
+      Route().handler(spy).getRequestHandler()(req, res, undefined);
+      expect(spy).toHaveBeenCalledWith(req, res, undefined);
     });
   });
 });
