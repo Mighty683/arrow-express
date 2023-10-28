@@ -1,7 +1,7 @@
 import Express from "express";
-export type RouteHandler<C = undefined, R = unknown> = (request: Express.Request, response: Express.Response, context: C) => R | Promise<R>;
+export type RouteHandler<C = undefined, R = undefined> = (request: Express.Request, response: Express.Response, context: C) => R | Promise<R>;
 export type HttpMethod = "get" | "post" | "head" | "put" | "delete" | "options" | "patch";
-export declare class RouteConfigurator<C = undefined, R = unknown> {
+export declare class RouteConfigurator<C = undefined, R = undefined> {
     private _method;
     private _path;
     private _handler;
@@ -28,4 +28,4 @@ export declare class RouteConfigurator<C = undefined, R = unknown> {
      */
     getRequestHandler(): RouteHandler<C, R>;
 }
-export declare function Route<C = undefined, R = unknown>(): RouteConfigurator<C, R>;
+export declare function Route<C = undefined, R = undefined>(): RouteConfigurator<C, R>;

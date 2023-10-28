@@ -21,12 +21,12 @@ export declare class AppConfigurator {
      * Register controller in application.
      * @param controller - registered controller
      */
-    registerController(controller: ControllerConfiguration<any>): AppConfigurator;
+    registerController(controller: ControllerConfiguration<any, any>): AppConfigurator;
     /**
      * Register list of controllers in application.
      * @param controllers - controllers to register
      */
-    registerControllers(...controllers: ControllerConfiguration<any>[]): AppConfigurator;
+    registerControllers(...controllers: ControllerConfiguration<any, any>[]): AppConfigurator;
     private printExpressConfig;
     private startControllers;
     private startController;

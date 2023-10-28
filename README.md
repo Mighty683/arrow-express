@@ -94,6 +94,10 @@ Application({
 - `registerController(controller)` - register sub controller in controller
 - `registerControllers(...controllers)` - register multiple sub controllers in controller
 
+#### Controller handler
+
+Controller handler can be used to eg: authorize user and get it's context which will be passed to routes. Handlers like controllers can be chained.
+
 ### Route
 
 Route is used to manage route handling.
@@ -137,6 +141,7 @@ Route handler receive 3 arguments:
 
 - `request` - which is Express.Request for path
 - `response` - which is Express.Response
+- `context` - which is resolution of controller's handler
 
 Features of route handler:
 

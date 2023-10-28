@@ -43,7 +43,7 @@ export class AppConfigurator {
    * Register controller in application.
    * @param controller - registered controller
    */
-  registerController(controller: ControllerConfiguration<any>): AppConfigurator {
+  registerController(controller: ControllerConfiguration<any, any>): AppConfigurator {
     this._controllers.push(controller);
     return this;
   }
@@ -52,7 +52,7 @@ export class AppConfigurator {
    * Register list of controllers in application.
    * @param controllers - controllers to register
    */
-  registerControllers(...controllers: ControllerConfiguration<any>[]): AppConfigurator {
+  registerControllers(...controllers: ControllerConfiguration<any, any>[]): AppConfigurator {
     controllers.forEach(controller => this.registerController(controller));
     return this;
   }
@@ -68,32 +68,47 @@ export class AppConfigurator {
     this._controllers.forEach(controller => this.startController(controller));
   }
 
-  private startController(controller: ControllerConfiguration, prefix = "") {
+  private startController(controller: ControllerConfiguration, controllersChain?: ControllerConfiguration[]) {
+    if (!controllersChain) {
+      controllersChain = [controller];
+    } else {
+      controllersChain.push(controller);
+    }
     controller.getControllers().forEach(subController => {
-      this.startController(subController, AppConfigurator.getRoutePath(controller.getPrefix(), prefix));
+      this.startController(subController, controllersChain);
     });
     controller.getRoutes().forEach(route => {
-      this.registerRouteInExpress(controller, route, prefix);
+      this.registerRouteInExpress(controllersChain, route);
     });
   }
 
-  private registerRouteInExpress(controller: ControllerConfiguration, route: RouteConfigurator, prefix?: string) {
-    const routePath = AppConfigurator.getRoutePath(prefix, controller.getPrefix(), route.getPath());
+  private registerRouteInExpress(controllersChain: ControllerConfiguration[], route: RouteConfigurator) {
+    const controllersPrefix = controllersChain.reduce(
+      (prefixAcc, controller) => AppConfigurator.getRoutePath(prefixAcc, controller.getPrefix()),
+      ""
+    );
+    const routePath = AppConfigurator.getRoutePath(controllersPrefix, route.getPath());
 
     if (!route.getMethod()) {
       throw new ConfigurationError(`Route ${routePath} has no method specified`);
     }
 
-    this._express[route.getMethod()](`/${routePath}`, this.createApplicationRequestHandler(route, controller));
+    this._express[route.getMethod()](`/${routePath}`, this.createApplicationRequestHandler(route, controllersChain));
   }
 
   private createApplicationRequestHandler(
     route: RouteConfigurator,
-    controller: ControllerConfiguration
+    controllersChain: ControllerConfiguration[]
   ): Express.RequestHandler {
     return async (req: Express.Request, res: Express.Response) => {
       try {
-        const context = await controller.getHandler()?.(req, res);
+        let context: undefined;
+
+        for (const controller of controllersChain) {
+          const newContextValue = await controller.getHandler()?.(req, res, context);
+          context = newContextValue ? newContextValue : context;
+        }
+
         const response = await route.getRequestHandler()(req, res, context);
         if (AppConfigurator.canSendResponse(res)) {
           if (!res.statusCode) {

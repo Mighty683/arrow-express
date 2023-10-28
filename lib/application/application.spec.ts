@@ -1,7 +1,7 @@
 import Express from "express";
 
 import { Application } from "./application";
-import { Controller } from "../controller/controller";
+import { Controller, ControllerHandler } from "../controller/controller";
 import { Route } from "../route/route";
 import { RequestError } from "../error/request.error";
 import { mocked } from "ts-jest/utils";
@@ -176,7 +176,7 @@ describe("Application", () => {
         expect(resSpy.status).not.toHaveBeenCalled();
       });
       it("should pass context from controller handler to route handler", async () => {
-        const spy = jest.fn().mockResolvedValue("context");
+        const spy = jest.fn().mockResolvedValue("context") as ControllerHandler<any>;
         const routeSpy = jest.fn();
         Application({ app: ExpressAppStub, logRequests: false })
           .registerController(Controller().handler(spy).registerRoute(Route().method("get").handler(routeSpy)))
@@ -184,8 +184,38 @@ describe("Application", () => {
         await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(routeSpy).toHaveBeenCalledWith(expect.anything(), expect.anything(), "context");
       });
+
+      it("should pass context from root controller to route handler", async () => {
+        const spy = jest.fn().mockResolvedValue("context") as ControllerHandler<any>;
+        const routeSpy = jest.fn();
+        Application({ app: ExpressAppStub, logRequests: false })
+          .registerController(
+            Controller()
+              .handler(spy)
+              .registerController(Controller().registerRoute(Route().method("get").handler(routeSpy)))
+          )
+          .configure(false);
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(routeSpy).toHaveBeenCalledWith(expect.anything(), expect.anything(), "context");
+      });
+
+      it("should pass context through controllers chain", async () => {
+        const rootSpy = jest.fn().mockResolvedValue("root") as ControllerHandler<any>;
+        const spy = jest.fn().mockImplementation((_, __, context) => context + "-child") as ControllerHandler<any>;
+        const routeSpy = jest.fn();
+        Application({ app: ExpressAppStub, logRequests: false })
+          .registerController(
+            Controller()
+              .handler(rootSpy)
+              .registerController(Controller().handler(spy).registerRoute(Route().method("get").handler(routeSpy)))
+          )
+          .configure(false);
+        await mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        expect(routeSpy).toHaveBeenCalledWith(expect.anything(), expect.anything(), "root-child");
+      });
+
       it("should call controller handler", async () => {
-        const spy = jest.fn().mockRejectedValue(new Error());
+        const spy = jest.fn().mockRejectedValue(new Error()) as ControllerHandler<any>;
         Application({ app: ExpressAppStub, logRequests: false })
           .registerController(Controller().handler(spy).registerRoute(Route().method("get")))
           .configure(false);
@@ -197,7 +227,7 @@ describe("Application", () => {
           code: 1,
           message: "msg",
         };
-        const spy = jest.fn().mockRejectedValue(new RequestError(401, response));
+        const spy = jest.fn().mockRejectedValue(new RequestError(401, response)) as ControllerHandler<any>;
         Application({ app: ExpressAppStub, logRequests: false })
           .registerController(Controller().handler(spy).registerRoute(Route().method("get")))
           .configure(false);

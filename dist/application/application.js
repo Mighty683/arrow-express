@@ -100,37 +100,54 @@ var AppConfigurator = /** @class */ (function () {
         var _this = this;
         this._controllers.forEach(function (controller) { return _this.startController(controller); });
     };
-    AppConfigurator.prototype.startController = function (controller, prefix) {
+    AppConfigurator.prototype.startController = function (controller, controllersChain) {
         var _this = this;
-        if (prefix === void 0) { prefix = ""; }
+        if (!controllersChain) {
+            controllersChain = [controller];
+        }
+        else {
+            controllersChain.push(controller);
+        }
         controller.getControllers().forEach(function (subController) {
-            _this.startController(subController, AppConfigurator.getRoutePath(controller.getPrefix(), prefix));
+            _this.startController(subController, controllersChain);
         });
         controller.getRoutes().forEach(function (route) {
-            _this.registerRouteInExpress(controller, route, prefix);
+            _this.registerRouteInExpress(controllersChain, route);
         });
     };
-    AppConfigurator.prototype.registerRouteInExpress = function (controller, route, prefix) {
-        var routePath = AppConfigurator.getRoutePath(prefix, controller.getPrefix(), route.getPath());
+    AppConfigurator.prototype.registerRouteInExpress = function (controllersChain, route) {
+        var controllersPrefix = controllersChain.reduce(function (prefixAcc, controller) { return AppConfigurator.getRoutePath(prefixAcc, controller.getPrefix()); }, "");
+        var routePath = AppConfigurator.getRoutePath(controllersPrefix, route.getPath());
         if (!route.getMethod()) {
             throw new configuration_error_1.ConfigurationError("Route ".concat(routePath, " has no method specified"));
         }
-        this._express[route.getMethod()]("/".concat(routePath), this.createApplicationRequestHandler(route, controller));
+        this._express[route.getMethod()]("/".concat(routePath), this.createApplicationRequestHandler(route, controllersChain));
     };
-    AppConfigurator.prototype.createApplicationRequestHandler = function (route, controller) {
+    AppConfigurator.prototype.createApplicationRequestHandler = function (route, controllersChain) {
         var _this = this;
         return function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            var context, response, error_1;
+            var context, _i, controllersChain_1, controller, newContextValue, response, error_1;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _b.trys.push([0, 3, 4, 5]);
-                        return [4 /*yield*/, ((_a = controller.getHandler()) === null || _a === void 0 ? void 0 : _a(req, res))];
+                        _b.trys.push([0, 6, 7, 8]);
+                        context = void 0;
+                        _i = 0, controllersChain_1 = controllersChain;
+                        _b.label = 1;
                     case 1:
-                        context = _b.sent();
-                        return [4 /*yield*/, route.getRequestHandler()(req, res, context)];
+                        if (!(_i < controllersChain_1.length)) return [3 /*break*/, 4];
+                        controller = controllersChain_1[_i];
+                        return [4 /*yield*/, ((_a = controller.getHandler()) === null || _a === void 0 ? void 0 : _a(req, res, context))];
                     case 2:
+                        newContextValue = _b.sent();
+                        context = newContextValue ? newContextValue : context;
+                        _b.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [4 /*yield*/, route.getRequestHandler()(req, res, context)];
+                    case 5:
                         response = _b.sent();
                         if (AppConfigurator.canSendResponse(res)) {
                             if (!res.statusCode) {
@@ -138,8 +155,8 @@ var AppConfigurator = /** @class */ (function () {
                             }
                             res.send(response);
                         }
-                        return [3 /*break*/, 5];
-                    case 3:
+                        return [3 /*break*/, 8];
+                    case 6:
                         error_1 = _b.sent();
                         if (AppConfigurator.canSendResponse(res)) {
                             if (error_1 instanceof request_error_1.RequestError) {
@@ -149,11 +166,11 @@ var AppConfigurator = /** @class */ (function () {
                                 res.status(500).send("Internal error");
                             }
                         }
-                        return [3 /*break*/, 5];
-                    case 4:
+                        return [3 /*break*/, 8];
+                    case 7:
                         this.logRequest(req, res);
                         return [7 /*endfinally*/];
-                    case 5: return [2 /*return*/];
+                    case 8: return [2 /*return*/];
                 }
             });
         }); };
