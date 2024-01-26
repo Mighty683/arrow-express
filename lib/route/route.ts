@@ -1,16 +1,16 @@
 import Express from "express";
 
-export type RouteHandler<C = undefined, R = undefined> = (
+export type RouteHandler<RootContext = undefined, Response = undefined> = (
   request: Express.Request,
   response: Express.Response,
-  context: C
-) => R | Promise<R>;
+  context: RootContext
+) => Response | Promise<Response>;
 export type HttpMethod = "get" | "post" | "head" | "put" | "delete" | "options" | "patch";
 
-export class RouteConfigurator<C = undefined, R = undefined> {
+export class RouteConfigurator<RootContext = undefined, Response = undefined> {
   private _method: HttpMethod;
   private _path: string;
-  private _handler: RouteHandler<C, R>;
+  private _handler: RouteHandler<RootContext, Response>;
 
   /**
    * Set method for route
@@ -34,7 +34,7 @@ export class RouteConfigurator<C = undefined, R = undefined> {
    * Set request handler, here you can handle request
    * @param handler - RouteHandler
    */
-  handler(handler: RouteHandler<C, R>): this {
+  handler(handler: RouteHandler<RootContext, Response>): this {
     this._handler = handler;
     return this;
   }
@@ -51,7 +51,7 @@ export class RouteConfigurator<C = undefined, R = undefined> {
    * Get request handler function
    * @return - function which is called by express application on request
    */
-  getRequestHandler(): RouteHandler<C, R> {
+  getRequestHandler(): RouteHandler<RootContext, Response> {
     return this._handler;
   }
 }

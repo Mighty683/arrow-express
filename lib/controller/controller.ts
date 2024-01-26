@@ -1,23 +1,23 @@
 import { RouteConfigurator } from "../route/route";
 import Express from "express";
 
-export type ControllerHandler<C = undefined, R = undefined> = (
+export type ControllerHandler<Context = undefined, RootContext = undefined> = (
   request: Express.Request,
   response: Express.Response,
-  rootContext?: R
-) => Promise<C>;
+  rootContext?: RootContext
+) => Promise<Context>;
 
-export class ControllerConfiguration<C = undefined, R = undefined> {
+export class ControllerConfiguration<Context = undefined, RootContext = undefined> {
   private _prefix = "";
-  private _controllers: ControllerConfiguration<unknown, C>[] = [];
-  private _routes: RouteConfigurator<C>[] = [];
-  private _handler: ControllerHandler<C, R> | undefined;
+  private _controllers: ControllerConfiguration<unknown, Context>[] = [];
+  private _routes: RouteConfigurator<Context>[] = [];
+  private _handler: ControllerHandler<Context, RootContext> | undefined;
 
   /**
    * Register child controller in controller
    * @param controller - controller to register
    */
-  registerController(controller: ControllerConfiguration<any, C>): this {
+  registerController(controller: ControllerConfiguration<any, Context>): this {
     this._controllers.push(controller);
     return this;
   }
@@ -35,7 +35,7 @@ export class ControllerConfiguration<C = undefined, R = undefined> {
    * Register route in controller
    * @param route - route used in controller
    */
-  registerRoute(route: RouteConfigurator<C>): this {
+  registerRoute(route: RouteConfigurator<Context, any>): this {
     this._routes.push(route);
     return this;
   }
@@ -44,7 +44,7 @@ export class ControllerConfiguration<C = undefined, R = undefined> {
    * Register array of routes in controller
    * @param routes - routes used in controller
    */
-  registerRoutes(...routes: RouteConfigurator<C, R>[]): this {
+  registerRoutes(...routes: RouteConfigurator<Context, any>[]): this {
     routes.forEach(this.registerRoute.bind(this));
     return this;
   }
@@ -61,24 +61,26 @@ export class ControllerConfiguration<C = undefined, R = undefined> {
    * Register controller handler which will be used by all routes
    * @param handler - ControllerHandler function
    */
-  handler<NewContext>(handler: ControllerHandler<NewContext, R>): ControllerConfiguration<NewContext, R> {
-    this._handler = handler as unknown as ControllerHandler<C, R>;
-    return this as unknown as ControllerConfiguration<NewContext, R>;
+  handler<NewContext>(
+    handler: ControllerHandler<NewContext, RootContext>
+  ): ControllerConfiguration<NewContext, RootContext> {
+    this._handler = handler as unknown as ControllerHandler<Context, RootContext>;
+    return this as unknown as ControllerConfiguration<NewContext, RootContext>;
   }
 
   getPrefix(): string {
     return this._prefix;
   }
 
-  getRoutes(): RouteConfigurator<C>[] {
+  getRoutes(): RouteConfigurator<Context>[] {
     return this._routes;
   }
 
-  getControllers(): ControllerConfiguration<any, C>[] {
+  getControllers(): ControllerConfiguration<any, Context>[] {
     return this._controllers;
   }
 
-  getHandler(): ControllerHandler<C, R> | undefined {
+  getHandler(): ControllerHandler<Context, RootContext> | undefined {
     return this._handler;
   }
 }

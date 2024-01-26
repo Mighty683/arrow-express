@@ -1,7 +1,7 @@
 import { RouteConfigurator } from "../route/route";
 import Express from "express";
-export type ControllerHandler<C = undefined, R = undefined> = (request: Express.Request, response: Express.Response, rootContext?: R) => Promise<C>;
-export declare class ControllerConfiguration<C = undefined, R = undefined> {
+export type ControllerHandler<Context = undefined, RootContext = undefined> = (request: Express.Request, response: Express.Response, rootContext?: RootContext) => Promise<Context>;
+export declare class ControllerConfiguration<Context = undefined, RootContext = undefined> {
     private _prefix;
     private _controllers;
     private _routes;
@@ -10,7 +10,7 @@ export declare class ControllerConfiguration<C = undefined, R = undefined> {
      * Register child controller in controller
      * @param controller - controller to register
      */
-    registerController(controller: ControllerConfiguration<any, C>): this;
+    registerController(controller: ControllerConfiguration<any, Context>): this;
     /**
      * Register array of controllers in controller
      * @param controllers - routes used in controller
@@ -20,12 +20,12 @@ export declare class ControllerConfiguration<C = undefined, R = undefined> {
      * Register route in controller
      * @param route - route used in controller
      */
-    registerRoute(route: RouteConfigurator<C>): this;
+    registerRoute(route: RouteConfigurator<Context, any>): this;
     /**
      * Register array of routes in controller
      * @param routes - routes used in controller
      */
-    registerRoutes(...routes: RouteConfigurator<C, R>[]): this;
+    registerRoutes(...routes: RouteConfigurator<Context, any>[]): this;
     /**
      * Register controller prefix which will be used by all routes
      * @param prefix - eg: 'login'
@@ -35,10 +35,10 @@ export declare class ControllerConfiguration<C = undefined, R = undefined> {
      * Register controller handler which will be used by all routes
      * @param handler - ControllerHandler function
      */
-    handler<NewContext>(handler: ControllerHandler<NewContext, R>): ControllerConfiguration<NewContext, R>;
+    handler<NewContext>(handler: ControllerHandler<NewContext, RootContext>): ControllerConfiguration<NewContext, RootContext>;
     getPrefix(): string;
-    getRoutes(): RouteConfigurator<C>[];
-    getControllers(): ControllerConfiguration<any, C>[];
-    getHandler(): ControllerHandler<C, R> | undefined;
+    getRoutes(): RouteConfigurator<Context>[];
+    getControllers(): ControllerConfiguration<any, Context>[];
+    getHandler(): ControllerHandler<Context, RootContext> | undefined;
 }
 export declare function Controller<C = undefined, R = undefined>(): ControllerConfiguration<C, R>;
