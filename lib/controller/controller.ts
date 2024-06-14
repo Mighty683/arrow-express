@@ -1,6 +1,8 @@
 import { RouteConfigurator } from "../route/route";
 import Express from "express";
 
+import { IsUndefinedOrNeverOrUnknown } from "../utils/types";
+
 export type ControllerHandler<Context = unknown, RootContext = unknown> = (
   request: Express.Request,
   response: Express.Response,
@@ -86,5 +88,6 @@ export function Controller<C = unknown, R = unknown>(): ControllerConfiguration<
   return new ControllerConfiguration<GetFinalControllerContext<C, R>, R>();
 }
 
-type GetFinalControllerContext<Context, RootContext> = IsUnknown<Context> extends true ? RootContext : Context;
-type IsUnknown<T> = unknown extends T ? (T extends unknown ? true : false) : false;
+type GetFinalControllerContext<Context, RootContext> = IsUndefinedOrNeverOrUnknown<Context> extends true
+  ? RootContext
+  : Context;
