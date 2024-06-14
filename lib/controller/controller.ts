@@ -6,18 +6,17 @@ export type ControllerHandler<Context = unknown, RootContext = unknown> = (
   response: Express.Response,
   rootContext?: RootContext
 ) => Promise<Context>;
-
-export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
+export class ControllerConfiguration<C = unknown, R = unknown> {
   private _prefix = "";
-  private _controllers: ControllerConfiguration<any, Context>[] = [];
-  private _routes: RouteConfigurator<Context>[] = [];
-  private _handler: ControllerHandler<Context, RootContext> | undefined;
+  private _controllers: ControllerConfiguration<any, GetFinalControllerContext<C, R>>[] = [];
+  private _routes: RouteConfigurator<GetFinalControllerContext<C, R>>[] = [];
+  private _handler: ControllerHandler<GetFinalControllerContext<C, R>, R> | undefined;
 
   /**
    * Register child controller in controller
    * @param controller - controller to register
    */
-  registerController(controller: ControllerConfiguration<any, Context>): this {
+  registerController(controller: ControllerConfiguration<any, GetFinalControllerContext<C, R>>): this {
     this._controllers.push(controller);
     return this;
   }
@@ -26,7 +25,7 @@ export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
    * Register array of controllers in controller
    * @param controllers - routes used in controller
    */
-  registerControllers(...controllers: ControllerConfiguration<any, Context>[]): this {
+  registerControllers(...controllers: ControllerConfiguration<any, GetFinalControllerContext<C, R>>[]): this {
     controllers.forEach(this.registerController.bind(this));
     return this;
   }
@@ -35,7 +34,7 @@ export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
    * Register route in controller
    * @param route - route used in controller
    */
-  registerRoute(route: RouteConfigurator<Context, any>): this {
+  registerRoute(route: RouteConfigurator<GetFinalControllerContext<C, R>, any>): this {
     this._routes.push(route);
     return this;
   }
@@ -44,7 +43,7 @@ export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
    * Register array of routes in controller
    * @param routes - routes used in controller
    */
-  registerRoutes(...routes: RouteConfigurator<Context, any>[]): this {
+  registerRoutes(...routes: RouteConfigurator<C, any>[]): this {
     routes.forEach(this.registerRoute.bind(this));
     return this;
   }
@@ -61,30 +60,30 @@ export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
    * Register controller handler which will be used by all routes
    * @param handler - ControllerHandler function
    */
-  handler<NewContext>(
-    handler: ControllerHandler<NewContext, RootContext>
-  ): ControllerConfiguration<NewContext, RootContext> {
-    this._handler = handler as unknown as ControllerHandler<Context, RootContext>;
-    return this as unknown as ControllerConfiguration<NewContext, RootContext>;
+  handler<NewContext>(handler: ControllerHandler<NewContext, R>): ControllerConfiguration<NewContext, R> {
+    this._handler = handler as unknown as ControllerHandler<GetFinalControllerContext<C, R>, R>;
+    return this as unknown as ControllerConfiguration<NewContext, R>;
   }
 
   getPrefix(): string {
     return this._prefix;
   }
 
-  getRoutes(): RouteConfigurator<Context>[] {
+  getRoutes(): RouteConfigurator<GetFinalControllerContext<C, R>>[] {
     return this._routes;
   }
 
-  getControllers(): ControllerConfiguration<any, Context>[] {
+  getControllers(): ControllerConfiguration<any, GetFinalControllerContext<C, R>>[] {
     return this._controllers;
   }
 
-  getHandler(): ControllerHandler<Context, RootContext> | undefined {
+  getHandler(): ControllerHandler<GetFinalControllerContext<C, R>, R> | undefined {
     return this._handler;
   }
 }
 
-export function Controller<C = unknown, R = unknown>(): ControllerConfiguration<C, R> {
-  return new ControllerConfiguration<C, R>();
+export function Controller<C = unknown, R = unknown>(): ControllerConfiguration<GetFinalControllerContext<C, R>, R> {
+  return new ControllerConfiguration<GetFinalControllerContext<C, R>, R>();
 }
+
+type GetFinalControllerContext<Context, RootContext> = Context extends unknown ? RootContext : Context;
