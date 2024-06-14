@@ -9,7 +9,7 @@ export type ControllerHandler<Context = unknown, RootContext = unknown> = (
 
 export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
   private _prefix = "";
-  private _controllers: ControllerConfiguration<unknown, Context>[] = [];
+  private _controllers: ControllerConfiguration<any, Context>[] = [];
   private _routes: RouteConfigurator<Context>[] = [];
   private _handler: ControllerHandler<Context, RootContext> | undefined;
 
@@ -17,7 +17,7 @@ export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
    * Register child controller in controller
    * @param controller - controller to register
    */
-  registerController(controller: ControllerConfiguration<unknown, Context>): this {
+  registerController(controller: ControllerConfiguration<any, Context>): this {
     this._controllers.push(controller);
     return this;
   }
@@ -26,7 +26,7 @@ export class ControllerConfiguration<Context = unknown, RootContext = unknown> {
    * Register array of controllers in controller
    * @param controllers - routes used in controller
    */
-  registerControllers(...controllers: ControllerConfiguration<unknown>[]): this {
+  registerControllers(...controllers: ControllerConfiguration<any, Context>[]): this {
     controllers.forEach(this.registerController.bind(this));
     return this;
   }
