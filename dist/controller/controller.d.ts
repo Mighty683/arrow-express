@@ -1,7 +1,7 @@
 import { RouteConfigurator } from "../route/route";
 import Express from "express";
-export type ControllerHandler<Context = undefined, RootContext = undefined> = (request: Express.Request, response: Express.Response, rootContext?: RootContext) => Promise<Context>;
-export declare class ControllerConfiguration<Context = undefined, RootContext = undefined> {
+export type ControllerHandler<Context = unknown, RootContext = unknown> = (request: Express.Request, response: Express.Response, rootContext?: RootContext) => Promise<Context>;
+export declare class ControllerConfiguration<Context = unknown, RootContext = unknown> {
     private _prefix;
     private _controllers;
     private _routes;
@@ -10,12 +10,12 @@ export declare class ControllerConfiguration<Context = undefined, RootContext = 
      * Register child controller in controller
      * @param controller - controller to register
      */
-    registerController(controller: ControllerConfiguration<any, Context>): this;
+    registerController(controller: ControllerConfiguration<unknown, Context>): this;
     /**
      * Register array of controllers in controller
      * @param controllers - routes used in controller
      */
-    registerControllers(...controllers: ControllerConfiguration<any>[]): this;
+    registerControllers(...controllers: ControllerConfiguration<unknown>[]): this;
     /**
      * Register route in controller
      * @param route - route used in controller
@@ -41,4 +41,4 @@ export declare class ControllerConfiguration<Context = undefined, RootContext = 
     getControllers(): ControllerConfiguration<any, Context>[];
     getHandler(): ControllerHandler<Context, RootContext> | undefined;
 }
-export declare function Controller<C = undefined, R = undefined>(): ControllerConfiguration<C, R>;
+export declare function Controller<C = unknown, R = unknown>(): ControllerConfiguration<C, R>;

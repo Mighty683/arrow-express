@@ -1,13 +1,13 @@
 import Express from "express";
 
-export type RouteHandler<RootContext = undefined, Response = undefined> = (
+export type RouteHandler<RootContext = unknown, Response = unknown> = (
   request: Express.Request,
   response: Express.Response,
   context: RootContext
 ) => Response | Promise<Response>;
 export type HttpMethod = "get" | "post" | "head" | "put" | "delete" | "options" | "patch";
 
-export class RouteConfigurator<RootContext = undefined, Response = undefined> {
+export class RouteConfigurator<RootContext = unknown, Response = unknown> {
   private _method: HttpMethod;
   private _path: string;
   private _handler: RouteHandler<RootContext, Response>;
@@ -56,6 +56,6 @@ export class RouteConfigurator<RootContext = undefined, Response = undefined> {
   }
 }
 
-export function Route<C = undefined, R = undefined>(): RouteConfigurator<C, R> {
+export function Route<C = unknown, R = unknown>(): RouteConfigurator<C, R> {
   return new RouteConfigurator<C, R>();
 }

@@ -102,7 +102,7 @@ export class AppConfigurator {
   ): Express.RequestHandler {
     return async (req: Express.Request, res: Express.Response) => {
       try {
-        let context: undefined;
+        let context: unknown;
 
         for (const controller of controllersChain) {
           const newContextValue = await controller.getHandler()?.(req, res, context);
