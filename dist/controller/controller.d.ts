@@ -10,12 +10,12 @@ export declare class ControllerConfiguration<Context = unknown, RootContext = un
      * Register child controller in controller
      * @param controller - controller to register
      */
-    registerController(controller: ControllerConfiguration<unknown, Context>): this;
+    registerController(controller: ControllerConfiguration<any, Context>): this;
     /**
      * Register array of controllers in controller
      * @param controllers - routes used in controller
      */
-    registerControllers(...controllers: ControllerConfiguration<unknown>[]): this;
+    registerControllers(...controllers: ControllerConfiguration<any, Context>[]): this;
     /**
      * Register route in controller
      * @param route - route used in controller

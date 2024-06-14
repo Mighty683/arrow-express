@@ -33,7 +33,7 @@ export class AppConfigurator {
     } else {
       this._configured = true;
     }
-    this.startControllers();
+    this.configureControllers();
     if (printConfiguration) {
       this.printExpressConfig();
     }
@@ -64,18 +64,18 @@ export class AppConfigurator {
     this.getExpressRoutesAsStrings().forEach(route => console.log(route));
   }
 
-  private startControllers() {
-    this._controllers.forEach(controller => this.startController(controller));
+  private configureControllers() {
+    this._controllers.forEach(controller => this.configureController(controller));
   }
 
-  private startController(controller: ControllerConfiguration, controllersChain?: ControllerConfiguration[]) {
+  private configureController(controller: ControllerConfiguration, controllersChain?: ControllerConfiguration[]) {
     if (!controllersChain) {
       controllersChain = [controller];
     } else {
-      controllersChain.push(controller);
+      controllersChain = [...controllersChain, controller];
     }
     controller.getControllers().forEach(subController => {
-      this.startController(subController, controllersChain);
+      this.configureController(subController, controllersChain);
     });
     controller.getRoutes().forEach(route => {
       this.registerRouteInExpress(controllersChain, route);

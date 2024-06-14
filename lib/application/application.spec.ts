@@ -82,10 +82,12 @@ describe("Application", () => {
             .registerController(
               Controller()
                 .prefix("root")
+                .registerRoute(Route().path("path").method("get").handler(handlerSpy))
                 .registerController(Controller().prefix("sub").registerRoute(Route().method("get").handler(handlerSpy)))
             )
             .configure(false);
           expect(ExpressAppStub.get).toHaveBeenCalledWith("/root/sub", expect.any(Function));
+          expect(ExpressAppStub.get).toHaveBeenCalledWith("/root/path", expect.any(Function));
         });
       });
     });

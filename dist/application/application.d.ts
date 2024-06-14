@@ -28,8 +28,8 @@ export declare class AppConfigurator {
      */
     registerControllers(...controllers: ControllerConfiguration<any, any>[]): AppConfigurator;
     private printExpressConfig;
-    private startControllers;
-    private startController;
+    private configureControllers;
+    private configureController;
     private registerRouteInExpress;
     private createApplicationRequestHandler;
     private logRequest;

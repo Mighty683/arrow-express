@@ -35,6 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Application = exports.AppConfigurator = void 0;
 var request_error_1 = require("../error/request.error");
@@ -65,7 +74,7 @@ var AppConfigurator = /** @class */ (function () {
         else {
             this._configured = true;
         }
-        this.startControllers();
+        this.configureControllers();
         if (printConfiguration) {
             this.printExpressConfig();
         }
@@ -96,20 +105,20 @@ var AppConfigurator = /** @class */ (function () {
         console.log("Routes registered by Express server:");
         this.getExpressRoutesAsStrings().forEach(function (route) { return console.log(route); });
     };
-    AppConfigurator.prototype.startControllers = function () {
+    AppConfigurator.prototype.configureControllers = function () {
         var _this = this;
-        this._controllers.forEach(function (controller) { return _this.startController(controller); });
+        this._controllers.forEach(function (controller) { return _this.configureController(controller); });
     };
-    AppConfigurator.prototype.startController = function (controller, controllersChain) {
+    AppConfigurator.prototype.configureController = function (controller, controllersChain) {
         var _this = this;
         if (!controllersChain) {
             controllersChain = [controller];
         }
         else {
-            controllersChain.push(controller);
+            controllersChain = __spreadArray(__spreadArray([], controllersChain, true), [controller], false);
         }
         controller.getControllers().forEach(function (subController) {
-            _this.startController(subController, controllersChain);
+            _this.configureController(subController, controllersChain);
         });
         controller.getRoutes().forEach(function (route) {
             _this.registerRouteInExpress(controllersChain, route);
