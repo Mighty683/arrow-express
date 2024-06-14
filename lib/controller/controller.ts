@@ -86,4 +86,5 @@ export function Controller<C = unknown, R = unknown>(): ControllerConfiguration<
   return new ControllerConfiguration<GetFinalControllerContext<C, R>, R>();
 }
 
-type GetFinalControllerContext<Context, RootContext> = Context extends unknown ? RootContext : Context;
+type GetFinalControllerContext<Context, RootContext> = IsUnknown<Context> extends true ? RootContext : Context;
+type IsUnknown<T> = unknown extends T ? (T extends unknown ? true : false) : false;
