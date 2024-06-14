@@ -1,13 +1,83 @@
 # Arrow Express
 
-Aim of this library is to make express applications bootstrapping easy and fast with zero configuration.
+Boostrap your express application with ease.
 
-Main principles:
+With `arrow-express` you can easily configure your express application routes.
 
-- Use arrow functions :)
-- Avoid adding complex configuration, lib will work out of the box
-- Focus on clean functional programming, avoid usage of complex additional configuration ideas like decorators etc.
-- Flexibility and ease of use
+## Features
+
+What `arrow-express` offers:
+
+- Quick way to define routes in express applications.
+- Define common routes properties by controllers.
+  - Define common prefix for routes grouped under controller.
+  - Define common context for routes grouped under controller. Eg: authorize user.
+  - Nest controllers.
+- Quickly define route by chaining methods.
+  - Define method.
+  - Define path.
+  - Define handler.
+    - In handler have access to request, response and context from controller.
+- Error handling.
+  - Throw `RequestError` to send back desired response with code.
+
+What `arrow-express` doesn't offer:
+
+- It's not a replacement for express.
+- It's not backend framework.
+  - It won't take care of database connections.
+  - It won't take care of authorization.
+  - Et cetera.
+
+## Example
+
+```ts
+/**
+ * Configure express application with arrow-express library.
+ * GET /user/:id
+ * GET /users
+ */
+
+import Express from "express";
+
+import { Application, Controller, Route } from "arrow-express";
+
+const ExpressApp = Express();
+
+function start() {
+  const application = Application({
+    app: ExpressApp,
+  })
+    .registerController(usersController)
+    .configure();
+
+  ExpressApp.listen(3000);
+}
+
+const usersController = Controller()
+  .prefix("user")
+  .handler(authorizeUser)
+  .registerRoutes(getUserByIdRoute, getUsersRoute);
+
+const getUserByIdRoute = Route()
+  .method("get")
+  .path(":id")
+  .handler(async (req, res, authorizedUser) => {
+    // ...
+  });
+
+const getUsersRoute = Route()
+  .method("get")
+  .path("")
+  .handler(async (req, res, authorizedUser) => {
+    // ...
+  });
+
+function authorizeUser(req, res) {
+  // Authorize user
+  return { id: 1, name: "John Doe" };
+}
+```
 
 ## Installation
 
