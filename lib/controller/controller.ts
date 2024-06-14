@@ -43,7 +43,7 @@ export class ControllerConfiguration<C = unknown, R = unknown> {
    * Register array of routes in controller
    * @param routes - routes used in controller
    */
-  registerRoutes(...routes: RouteConfigurator<C, any>[]): this {
+  registerRoutes(...routes: RouteConfigurator<GetFinalControllerContext<C, R>, any>[]): this {
     routes.forEach(this.registerRoute.bind(this));
     return this;
   }
