@@ -1,5 +1,11 @@
 # arrow-express
 
+## 3.1.1
+
+### Minor changes
+
+- Add CI
+
 ## 3.1.0
 
 - Add prefix path to application level
