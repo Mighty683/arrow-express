@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Controller = exports.ControllerConfiguration = void 0;
+exports.ControllerConfiguration = void 0;
+exports.Controller = Controller;
 var ControllerConfiguration = /** @class */ (function () {
     function ControllerConfiguration() {
         this._prefix = "";
@@ -81,4 +82,3 @@ exports.ControllerConfiguration = ControllerConfiguration;
 function Controller() {
     return new ControllerConfiguration();
 }
-exports.Controller = Controller;

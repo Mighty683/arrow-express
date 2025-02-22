@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "outDir": "dist",
+        "target": "ES5",
+        "types": ["node"]
+    },
+    "include": [
+        "lib/**/*.ts",
+    ],
+    "exclude": [
+        "**/*.spec.ts",
+        "node_modules"
+    ]
+}

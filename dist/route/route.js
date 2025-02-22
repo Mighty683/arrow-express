@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Route = exports.RouteConfigurator = void 0;
+exports.RouteConfigurator = void 0;
+exports.Route = Route;
 var RouteConfigurator = /** @class */ (function () {
     function RouteConfigurator() {
     }
@@ -47,4 +48,3 @@ exports.RouteConfigurator = RouteConfigurator;
 function Route() {
     return new RouteConfigurator();
 }
-exports.Route = Route;
