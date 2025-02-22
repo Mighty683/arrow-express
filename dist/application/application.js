@@ -57,6 +57,7 @@ var AppConfigurator = /** @class */ (function () {
      */
     function AppConfigurator(expressApplication, logRequests) {
         if (logRequests === void 0) { logRequests = true; }
+        this._prefix = "";
         this._controllers = [];
         this._express = expressApplication;
         this._configured = false;
@@ -79,6 +80,14 @@ var AppConfigurator = /** @class */ (function () {
         if (printConfiguration) {
             this.printExpressConfig();
         }
+    };
+    /**
+     * Register prefix for all paths in application
+     * @param prefix - prefix string eg: 'api'
+     */
+    AppConfigurator.prototype.prefix = function (prefix) {
+        this._prefix = prefix;
+        return this;
     };
     /**
      * Register controller in application.
@@ -126,7 +135,7 @@ var AppConfigurator = /** @class */ (function () {
         });
     };
     AppConfigurator.prototype.registerRouteInExpress = function (controllersChain, route) {
-        var controllersPrefix = controllersChain.reduce(function (prefixAcc, controller) { return AppConfigurator.getRoutePath(prefixAcc, controller.getPrefix()); }, "");
+        var controllersPrefix = controllersChain.reduce(function (prefixAcc, controller) { return AppConfigurator.getRoutePath(prefixAcc, controller.getPrefix()); }, this._prefix || "");
         var routePath = AppConfigurator.getRoutePath(controllersPrefix, route.getPath());
         if (!route.getMethod()) {
             throw new configuration_error_1.ConfigurationError("Route ".concat(routePath, " has no method specified"));

@@ -1,6 +1,7 @@
 import Express from "express";
 import { ControllerConfiguration } from "../controller/controller";
 export declare class AppConfigurator {
+    private _prefix;
     private readonly _express;
     private readonly _controllers;
     private readonly logRequests;
@@ -17,6 +18,11 @@ export declare class AppConfigurator {
      * @param printConfiguration - print express application routes enabled by default.
      */
     configure(printConfiguration?: boolean): void;
+    /**
+     * Register prefix for all paths in application
+     * @param prefix - prefix string eg: 'api'
+     */
+    prefix(prefix: string): AppConfigurator;
     /**
      * Register controller in application.
      * @param controller - registered controller

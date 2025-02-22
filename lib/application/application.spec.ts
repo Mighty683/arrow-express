@@ -58,6 +58,15 @@ describe("Application", () => {
         expect(ExpressAppStub.get).toHaveBeenCalledWith("/prefix", expect.any(Function));
       });
 
+      it("should register route with application prefix", () => {
+        const handlerSpy = vi.fn();
+        Application({ app: ExpressAppStub })
+          .prefix("app-prefix")
+          .registerController(Controller().prefix("prefix").registerRoute(Route().method("get").handler(handlerSpy)))
+          .configure(false);
+        expect(ExpressAppStub.get).toHaveBeenCalledWith("/app-prefix/prefix", expect.any(Function));
+      });
+
       it("should register route without path and prefix", () => {
         const handlerSpy = vi.fn();
         Application({ app: ExpressAppStub })

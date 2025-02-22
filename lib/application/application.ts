@@ -6,6 +6,7 @@ import { RequestError } from "../error/request.error";
 import { ConfigurationError } from "../error/configuration.error";
 
 export class AppConfigurator {
+  private _prefix = "";
   private readonly _express: Express.Application;
   private readonly _controllers: ControllerConfiguration<any>[] = [];
   private readonly logRequests: boolean;
@@ -37,6 +38,15 @@ export class AppConfigurator {
     if (printConfiguration) {
       this.printExpressConfig();
     }
+  }
+
+  /**
+   * Register prefix for all paths in application
+   * @param prefix - prefix string eg: 'api'
+   */
+  prefix(prefix: string): AppConfigurator {
+    this._prefix = prefix;
+    return this;
   }
 
   /**
@@ -85,7 +95,7 @@ export class AppConfigurator {
   private registerRouteInExpress(controllersChain: ControllerConfiguration[], route: RouteConfigurator) {
     const controllersPrefix = controllersChain.reduce(
       (prefixAcc, controller) => AppConfigurator.getRoutePath(prefixAcc, controller.getPrefix()),
-      ""
+      this._prefix || ""
     );
     const routePath = AppConfigurator.getRoutePath(controllersPrefix, route.getPath());
 
