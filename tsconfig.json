@@ -3,12 +3,11 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "outDir": "dist",
-        "target": "ES5"
+        "target": "ES5",
+        "types": ["node","vitest/globals"]
     },
     "include": [
-        "lib/**/*"
+        "lib/**/*.ts",
+        "vitest.config.ts"
     ],
-    "exclude": [
-        "**/*.spec.ts"
-    ]
 }

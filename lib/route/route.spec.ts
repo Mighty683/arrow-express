@@ -6,7 +6,7 @@ describe("Route", () => {
   const res = {} as Express.Response;
   describe("Request handle configuration", () => {
     it("should call handler", () => {
-      const spy = jest.fn();
+      const spy = vi.fn();
       Route().handler(spy).getRequestHandler()(req, res, undefined);
       expect(spy).toHaveBeenCalledWith(req, res, undefined);
     });
