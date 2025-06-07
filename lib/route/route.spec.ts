@@ -1,9 +1,8 @@
 import { Route } from "./route";
-import Express from "express";
 
 describe("Route", () => {
-  const req = {} as Express.Request;
-  const res = {} as Express.Response;
+  const req = {};
+  const res = {};
   describe("Request handle configuration", () => {
     it("should call handler", () => {
       const spy = vi.fn();

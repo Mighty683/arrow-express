@@ -114,8 +114,7 @@ declare class ExpressAdapterConfiguration {
     private static canSendResponse;
     private createRequestHandler;
     /**
-     * Starts application, register controllers routes in express app
-     * and connect to configured port.
+     * Register controllers routes in express app
      * @param printConfiguration - print express application routes enabled by default.
      */
     configure(printConfiguration?: boolean): void;

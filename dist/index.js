@@ -249,7 +249,6 @@ class ExpressAdapterConfiguration {
     );
   }
   getExpressRoutesAsStrings() {
-    console.log(this._express);
     return this._express.router.stack.filter((r) => r.route).map(ExpressAdapterConfiguration.expressRouteAsString);
   }
   printExpressConfig() {
@@ -282,8 +281,7 @@ class ExpressAdapterConfiguration {
     };
   }
   /**
-   * Starts application, register controllers routes in express app
-   * and connect to configured port.
+   * Register controllers routes in express app
    * @param printConfiguration - print express application routes enabled by default.
    */
   configure(printConfiguration = true) {
