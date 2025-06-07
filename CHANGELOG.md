@@ -1,5 +1,12 @@
 # arrow-express
 
+## 4.0.0
+
+### Major changes
+
+- Split Express configuration into separate adapter
+- Allow to integrate other frameworks as well
+
 ## 3.1.1
 
 ### Minor changes

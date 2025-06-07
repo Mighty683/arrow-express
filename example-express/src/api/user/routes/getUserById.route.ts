@@ -9,6 +9,7 @@ export function GetUserByIdRoute(userService: UserService): RouteConfigurator<Us
     .method("get")
     .path(":id")
     .handler(async (req): Promise<User> => {
-      return await userService.getUserById(Number(req.params.id));
+      const userId = req.params.id;
+      return await userService.getUserById(Number(userId));
     });
 }

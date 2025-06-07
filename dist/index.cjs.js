@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 class AppConfigurator {
   _prefix = "";
   _controllers = [];
@@ -302,14 +304,12 @@ class ExpressAdapterConfiguration {
 const ExpressAdapter = (express, appConfigurator) => {
   return new ExpressAdapterConfiguration(express, appConfigurator);
 };
-export {
-  AppConfigurator,
-  Application,
-  Controller,
-  ControllerConfiguration,
-  ExpressAdapter,
-  RequestError,
-  Route,
-  RouteConfigurator
-};
-//# sourceMappingURL=index.js.map
+exports.AppConfigurator = AppConfigurator;
+exports.Application = Application;
+exports.Controller = Controller;
+exports.ControllerConfiguration = ControllerConfiguration;
+exports.ExpressAdapter = ExpressAdapter;
+exports.RequestError = RequestError;
+exports.Route = Route;
+exports.RouteConfigurator = RouteConfigurator;
+//# sourceMappingURL=index.cjs.js.map

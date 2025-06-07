@@ -6,6 +6,7 @@
         "target": "ES5"
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "override.d.ts"
     ]
 }

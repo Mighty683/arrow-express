@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "outDir": "dist",
+        "target": "ES5",
+        "moduleResolution": "node",
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*",
+        "override.d.ts"
+    ],
+    "ts-node": {
+        "files": true
+    }
+}

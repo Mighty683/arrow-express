@@ -4,7 +4,7 @@ import Compression from "compression";
 import cors from "cors";
 
 // Api packages
-import { Application } from "arrow-express";
+import { Application, ExpressAdapter } from "arrow-express";
 import { UserController } from "./api/user/user.controller";
 
 // Data packages
@@ -18,11 +18,7 @@ async function startServer() {
   expressApplication.use(Compression());
   expressApplication.use(Express.json());
 
-  Application({
-    app: expressApplication,
-  })
-    .registerController(UserController(userService))
-    .configure();
+  ExpressAdapter(expressApplication, Application().registerController(UserController(userService))).configure();
   expressApplication.listen(3001);
 }
 

@@ -1,11 +1,11 @@
 import { RouteConfigurator } from "../route/route";
-import Express from "express";
 
 import { IsUndefinedOrNeverOrUnknown } from "../utils/types";
+import { ArrowExpress } from "../types";
 
 export type ControllerHandler<Context = unknown, RootContext = unknown> = (
-  request: Express.Request,
-  response: Express.Response,
+  request: ArrowExpress.InternalRequestType,
+  response: ArrowExpress.InternalResponseType,
   rootContext?: RootContext
 ) => Promise<Context>;
 export class ControllerConfiguration<C = unknown, R = unknown> {

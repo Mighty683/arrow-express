@@ -1,16 +1,16 @@
-import Express from "express";
+import { ArrowExpress } from "../types";
 
-export type RouteHandler<RootContext = unknown, Response = unknown> = (
-  request: Express.Request,
-  response: Express.Response,
+export type RouteHandler<RootContext = unknown, ResponseObject = unknown> = (
+  request: ArrowExpress.InternalRequestType,
+  response: ArrowExpress.InternalResponseType,
   context: RootContext
-) => Response | Promise<Response>;
+) => ResponseObject | Promise<ResponseObject>;
 export type HttpMethod = "get" | "post" | "head" | "put" | "delete" | "options" | "patch";
 
 export class RouteConfigurator<RootContext = unknown, Response = unknown> {
-  private _method: HttpMethod;
-  private _path: string;
-  private _handler: RouteHandler<RootContext, Response>;
+  private _method!: HttpMethod;
+  private _path!: string;
+  private _handler!: RouteHandler<RootContext, Response>;
 
   /**
    * Set method for route
