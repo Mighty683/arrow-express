@@ -339,6 +339,7 @@ app.listen(3000);
 - `configure(printConfiguration = true)` - Registers all routes from the application into Express
   - `printConfiguration` - Whether to log registered routes to console (default: true)
   - Throws error if called multiple times (prevents duplicate route registration)
+  - Validates route methods and handlers before registering routes
 
 **Error Handling:**
 The adapter automatically handles `RequestError` exceptions:
@@ -377,7 +378,8 @@ throw new RequestError(401, {
 
 - When using `ExpressAdapter`, `RequestError` exceptions are automatically caught
 - The HTTP status code and response body are automatically sent
-- Other errors result in 500 Internal Server Error responses
+- Unexpected errors are passed to Express error middleware; register that middleware after configuring the adapter
+- If a response has already started, the adapter does not send another response and passes errors to Express
 
 ## Advanced Patterns
 

@@ -101,6 +101,15 @@ describe("Express Adapter", () => {
           ).configure(false)
         ).toThrow(ConfigurationError);
       });
+      it("should throw configuration error when route without handler is registered", () => {
+        expect(() =>
+          ExpressAdapter(
+            ExpressAppStub,
+            Application().registerController(Controller().prefix("prefix").registerRoute(Route().method("get")))
+          ).configure(false)
+        ).toThrow(ConfigurationError);
+        expect(ExpressAppStub.get).not.toHaveBeenCalled();
+      });
       describe("sub controllers", () => {
         it("should register sub controller route", () => {
           const handlerSpy = vi.fn();
@@ -117,7 +126,71 @@ describe("Express Adapter", () => {
           expect(ExpressAppStub.get).toHaveBeenCalledWith("/root/sub", expect.any(Function));
           expect(ExpressAppStub.get).toHaveBeenCalledWith("/root/path", expect.any(Function));
         });
+
+        it("should include application and every controller prefix", () => {
+          const handlerSpy = vi.fn();
+          const expressAdapter = ExpressAdapter(
+            ExpressAppStub,
+            Application()
+              .prefix("api")
+              .registerController(
+                Controller()
+                  .prefix("root")
+                  .registerController(
+                    Controller()
+                      .prefix("child")
+                      .registerController(
+                        Controller().prefix("grandchild").registerRoute(Route().method("get").handler(handlerSpy))
+                      )
+                  )
+              )
+          );
+          expressAdapter.configure(false);
+          expect(ExpressAppStub.get).toHaveBeenCalledWith("/api/root/child/grandchild", expect.any(Function));
+        });
       });
+    });
+    it("should validate every route before registering any route", () => {
+      const validRoute = Route().method("get").handler(vi.fn());
+      const invalidRoute = Route().method("get");
+      const expressAdapter = ExpressAdapter(
+        ExpressAppStub,
+        Application()
+          .registerController(Controller().registerRoute(validRoute))
+          .registerController(Controller().registerRoute(invalidRoute))
+      );
+
+      expect(() => expressAdapter.configure(false)).toThrow(ConfigurationError);
+      expect(ExpressAppStub.get).not.toHaveBeenCalled();
+    });
+
+    it("should reject unsupported HTTP methods before registering routes", () => {
+      const expressAdapter = ExpressAdapter(
+        ExpressAppStub,
+        Application().registerController(
+          Controller().registerRoutes(
+            Route().method("get").handler(vi.fn()),
+            Route().method("trace" as never).handler(vi.fn())
+          )
+        )
+      );
+
+      expect(() => expressAdapter.configure(false)).toThrow(ConfigurationError);
+      expect(ExpressAppStub.get).not.toHaveBeenCalled();
+    });
+
+    it("should allow configure to be retried after validation fails", () => {
+      const route = Route().method("get");
+      const expressAdapter = ExpressAdapter(
+        ExpressAppStub,
+        Application().registerController(Controller().registerRoute(route))
+      );
+
+      expect(() => expressAdapter.configure(false)).toThrow(ConfigurationError);
+      route.handler(vi.fn());
+
+      expect(() => expressAdapter.configure(false)).not.toThrow();
+      expect(ExpressAppStub.get).toHaveBeenCalledWith("/", expect.any(Function));
     });
     describe("request handling", () => {
       let resSpy: Response;
@@ -163,7 +236,7 @@ describe("Express Adapter", () => {
       });
 
       describe("error handling", () => {
-        it("should response code 500 by default", async () => {
+        it("should forward unexpected errors to express", async () => {
           const resSpy = {
             status: vi.fn().mockImplementation(() => resSpy),
             send: vi.fn().mockImplementation(() => resSpy),
@@ -171,28 +244,15 @@ describe("Express Adapter", () => {
           } as unknown as Response;
 
           const spy = vi.fn().mockRejectedValue(new Error());
+          const next = vi.fn();
           ExpressAdapter(
             ExpressAppStub,
             Application().registerController(Controller().registerRoute(Route().method("get").handler(spy)))
           ).configure(false);
-          await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
-          expect(resSpy.status).toHaveBeenCalledWith(500);
+          await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy, next);
+          expect(next).toHaveBeenCalledWith(expect.any(Error));
+          expect(resSpy.status).not.toHaveBeenCalled();
         });
-      });
-      it("should response code 500 on non RequestError", async () => {
-        const resSpy = {
-          status: vi.fn().mockImplementation(() => resSpy),
-          send: vi.fn().mockImplementation(() => resSpy),
-          writableEnded: false,
-        } as unknown as Response;
-
-        const spy = vi.fn().mockRejectedValue(new Error());
-        ExpressAdapter(
-          ExpressAppStub,
-          Application().registerController(Controller().registerRoute(Route().method("get").handler(spy)))
-        ).configure(false);
-        await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
-        expect(resSpy.status).toHaveBeenCalledWith(500);
       });
       it("should response 404", async () => {
         const resSpy = {
@@ -224,15 +284,17 @@ describe("Express Adapter", () => {
         expect(resSpy.send).toHaveBeenCalledWith(response);
         expect(resSpy.status).toHaveBeenCalledWith(401);
       });
-      it("should not response", async () => {
+      it("should forward errors when the response has already ended", async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (resSpy.writableEnded as boolean) = true;
         const spy = vi.fn().mockRejectedValue(new Error());
+        const next = vi.fn();
         ExpressAdapter(
           ExpressAppStub,
           Application().registerController(Controller().registerRoute(Route().method("get").handler(spy)))
         ).configure(false);
-        await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
+        await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy, next);
+        expect(next).toHaveBeenCalledWith(expect.any(Error));
         expect(resSpy.status).not.toHaveBeenCalled();
       });
       it("should pass context from controller handler to route handler", async () => {
@@ -297,7 +359,7 @@ describe("Express Adapter", () => {
         const spy = vi.fn().mockResolvedValue("context") as ControllerHandler<any>;
         ExpressAdapter(
           ExpressAppStub,
-          Application().registerController(Controller().handler(spy).registerRoute(Route().method("get")))
+          Application().registerController(Controller().handler(spy).registerRoute(Route().method("get").handler(vi.fn())))
         ).configure(false);
         await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(spy).toHaveBeenCalled();
@@ -310,7 +372,7 @@ describe("Express Adapter", () => {
         const spy = vi.fn().mockRejectedValue(new RequestError(401, response)) as ControllerHandler<any>;
         ExpressAdapter(
           ExpressAppStub,
-          Application().registerController(Controller().handler(spy).registerRoute(Route().method("get")))
+          Application().registerController(Controller().handler(spy).registerRoute(Route().method("get").handler(vi.fn())))
         ).configure(false);
         await vi.mocked(ExpressAppStub.get).mock.calls[0][1]({} as never, resSpy);
         expect(resSpy.send).toHaveBeenCalledWith(response);

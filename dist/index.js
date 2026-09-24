@@ -1,3 +1,9 @@
+class ConfigurationError extends Error {
+  constructor(message) {
+    super(message);
+    Object.setPrototypeOf(this, ConfigurationError.prototype);
+  }
+}
 class AppConfigurator {
   _prefix = "";
   _controllers = [];
@@ -56,23 +62,29 @@ class AppConfigurator {
     );
   }
   reduceController(controller, path, handler) {
+    const controllerPath = AppConfigurator.getRoutePath(path || "", controller.getPrefix());
     return controller.getRoutes().map((route) => {
+      const routePath = AppConfigurator.getRoutePath(controllerPath, route.getPath());
+      const requestHandler = route.getRequestHandler();
+      if (!route.getMethod() || typeof requestHandler !== "function") {
+        throw new ConfigurationError(`Route /${routePath} must define an HTTP method and handler`);
+      }
       const routeConfiguration = {
-        path: AppConfigurator.getRoutePath(path || "", controller.getPrefix(), route.getPath()),
+        path: routePath,
         method: route.getMethod(),
-        handler: async (res, req, context) => {
-          const currentContext = await handler?.(res, req, context) || context;
-          const controllerContext = await controller.getHandler()?.(res, req, currentContext);
-          return route.getRequestHandler()?.(res, req, controllerContext || currentContext);
+        handler: async (request, response, context) => {
+          const currentContext = await handler?.(request, response, context) || context;
+          const controllerContext = await controller.getHandler()?.(request, response, currentContext);
+          return requestHandler(request, response, controllerContext || currentContext);
         }
       };
       return routeConfiguration;
     }).concat(
       controller.getControllers().reduce((subRoutes, subController) => {
         return subRoutes.concat(
-          this.reduceController(subController, controller.getPrefix(), async (res, req, context) => {
-            const currentContext = await handler?.(res, req, context) || context;
-            return controller.getHandler()?.(res, req, currentContext);
+          this.reduceController(subController, controllerPath, async (request, response, context) => {
+            const currentContext = await handler?.(request, response, context) || context;
+            return controller.getHandler()?.(request, response, currentContext);
           })
         );
       }, [])
@@ -204,12 +216,6 @@ class RouteConfigurator {
 function Route() {
   return new RouteConfigurator();
 }
-class ConfigurationError extends Error {
-  constructor(message) {
-    super(message);
-    Object.setPrototypeOf(this, ConfigurationError.prototype);
-  }
-}
 class RequestError extends Error {
   response;
   httpCode;
@@ -225,6 +231,7 @@ class RequestError extends Error {
     Object.setPrototypeOf(this, RequestError.prototype);
   }
 }
+const SUPPORTED_HTTP_METHODS = /* @__PURE__ */ new Set(["get", "post", "head", "put", "delete", "options", "patch"]);
 class ExpressAdapterConfiguration {
   _express;
   _appConfigurator;
@@ -237,12 +244,14 @@ class ExpressAdapterConfiguration {
   static expressRouteAsString(r) {
     return `${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`;
   }
-  registerRouteInExpress(routeConfiguration) {
-    if (!routeConfiguration.method || !routeConfiguration.handler) {
+  validateRoute(routeConfiguration) {
+    if (typeof routeConfiguration.path !== "string" || !SUPPORTED_HTTP_METHODS.has(routeConfiguration.method) || typeof routeConfiguration.handler !== "function" || typeof this._express[routeConfiguration.method] !== "function") {
       throw new ConfigurationError(
-        `${routeConfiguration.path} route is not properly configured, missing path, method or handler`
+        `${routeConfiguration.path} route is not properly configured, missing or invalid path, method or handler`
       );
     }
+  }
+  registerRouteInExpress(routeConfiguration) {
     this._express[routeConfiguration.method](
       `/${routeConfiguration.path}`,
       this.createRequestHandler(routeConfiguration)
@@ -256,10 +265,10 @@ class ExpressAdapterConfiguration {
     this.getExpressRoutesAsStrings().forEach((route) => console.log(route));
   }
   static canSendResponse(res) {
-    return !res.writableEnded;
+    return !res.headersSent && !res.writableEnded;
   }
   createRequestHandler(routeConfiguration) {
-    return async (req, res) => {
+    return async (req, res, next) => {
       try {
         let context;
         const response = await routeConfiguration.handler(req, res, context);
@@ -270,13 +279,11 @@ class ExpressAdapterConfiguration {
           res.send(response);
         }
       } catch (error) {
-        if (ExpressAdapterConfiguration.canSendResponse(res)) {
-          if (error instanceof RequestError) {
-            res.status(error.httpCode || 500).send(error.response || "Internal error");
-          } else {
-            res.status(500).send("Internal error");
-          }
+        if (error instanceof RequestError && ExpressAdapterConfiguration.canSendResponse(res)) {
+          res.status(error.httpCode || 500).send(error.response || "Internal error");
+          return;
         }
+        next(error);
       }
     };
   }
@@ -287,11 +294,11 @@ class ExpressAdapterConfiguration {
   configure(printConfiguration = true) {
     if (this._configured) {
       throw new ConfigurationError("Cannot configure application multiple times");
-    } else {
-      this._configured = true;
     }
     const routesConfigurations = this._appConfigurator.buildRoutes();
+    routesConfigurations.forEach((routeConfiguration) => this.validateRoute(routeConfiguration));
     routesConfigurations.forEach((routeConfiguration) => this.registerRouteInExpress(routeConfiguration));
+    this._configured = true;
     if (printConfiguration) {
       this.printExpressConfig();
     }

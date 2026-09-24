@@ -108,6 +108,7 @@ declare class ExpressAdapterConfiguration {
     private _configured;
     constructor(express: Express_2, appConfigurator: AppConfigurator);
     private static expressRouteAsString;
+    private validateRoute;
     private registerRouteInExpress;
     private getExpressRoutesAsStrings;
     private printExpressConfig;
