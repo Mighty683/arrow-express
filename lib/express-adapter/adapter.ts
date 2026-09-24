@@ -4,6 +4,8 @@ import { ConfigurationError } from "../error/configuration.error";
 import { RouteConfiguration } from "../types";
 import { RequestError } from "../error/request.error";
 
+const SUPPORTED_HTTP_METHODS = new Set(["get", "post", "head", "put", "delete", "options", "patch"]);
+
 export class ExpressAdapterConfiguration {
   private readonly _express: Express;
   private readonly _appConfigurator: AppConfigurator;
@@ -18,12 +20,20 @@ export class ExpressAdapterConfiguration {
     return `${Object.keys(r.route.methods)[0].toUpperCase()}:${r.route?.path}`;
   }
 
-  private registerRouteInExpress(routeConfiguration: RouteConfiguration) {
-    if (!routeConfiguration.method || !routeConfiguration.handler) {
+  private validateRoute(routeConfiguration: RouteConfiguration) {
+    if (
+      typeof routeConfiguration.path !== "string" ||
+      !SUPPORTED_HTTP_METHODS.has(routeConfiguration.method) ||
+      typeof routeConfiguration.handler !== "function" ||
+      typeof (this._express as unknown as Record<string, unknown>)[routeConfiguration.method] !== "function"
+    ) {
       throw new ConfigurationError(
-        `${routeConfiguration.path} route is not properly configured, missing path, method or handler`
+        `${routeConfiguration.path} route is not properly configured, missing or invalid path, method or handler`
       );
     }
+  }
+
+  private registerRouteInExpress(routeConfiguration: RouteConfiguration) {
     (this._express as any)[routeConfiguration.method](
       `/${routeConfiguration.path}`,
       this.createRequestHandler(routeConfiguration)
@@ -40,11 +50,11 @@ export class ExpressAdapterConfiguration {
   }
 
   private static canSendResponse(res: Response) {
-    return !res.writableEnded;
+    return !res.headersSent && !res.writableEnded;
   }
 
   private createRequestHandler(routeConfiguration: RouteConfiguration): RequestHandler {
-    return async (req: Request, res: Response) => {
+    return async (req: Request, res: Response, next) => {
       try {
         let context: unknown;
 
@@ -56,13 +66,12 @@ export class ExpressAdapterConfiguration {
           res.send(response);
         }
       } catch (error) {
-        if (ExpressAdapterConfiguration.canSendResponse(res)) {
-          if (error instanceof RequestError) {
-            res.status(error.httpCode || 500).send(error.response || "Internal error");
-          } else {
-            res.status(500).send("Internal error");
-          }
+        if (error instanceof RequestError && ExpressAdapterConfiguration.canSendResponse(res)) {
+          res.status(error.httpCode || 500).send(error.response || "Internal error");
+          return;
         }
+
+        next(error);
       }
     };
   }
@@ -74,11 +83,11 @@ export class ExpressAdapterConfiguration {
   configure(printConfiguration = true): void {
     if (this._configured) {
       throw new ConfigurationError("Cannot configure application multiple times");
-    } else {
-      this._configured = true;
     }
     const routesConfigurations = this._appConfigurator.buildRoutes();
+    routesConfigurations.forEach(routeConfiguration => this.validateRoute(routeConfiguration));
     routesConfigurations.forEach(routeConfiguration => this.registerRouteInExpress(routeConfiguration));
+    this._configured = true;
     if (printConfiguration) {
       this.printExpressConfig();
     }

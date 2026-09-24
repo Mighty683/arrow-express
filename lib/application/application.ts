@@ -1,5 +1,7 @@
 import { ControllerConfiguration, ControllerHandler } from "../controller/controller";
+import { ConfigurationError } from "../error/configuration.error";
 import { RouteConfiguration } from "../types";
+
 export class AppConfigurator {
   private _prefix = "";
   private readonly _controllers: ControllerConfiguration<any>[] = [];
@@ -70,17 +72,25 @@ export class AppConfigurator {
     path?: string,
     handler?: ControllerHandler
   ): RouteConfiguration[] {
+    const controllerPath = AppConfigurator.getRoutePath(path || "", controller.getPrefix());
+
     return controller
       .getRoutes()
       .map<RouteConfiguration>(route => {
-        const routeConfiguration: RouteConfiguration = {
-          path: AppConfigurator.getRoutePath(path || "", controller.getPrefix(), route.getPath()),
-          method: route.getMethod(),
-          handler: async (res, req, context) => {
-            const currentContext = (await handler?.(res, req, context)) || context;
-            const controllerContext = await controller.getHandler()?.(res, req, currentContext);
+        const routePath = AppConfigurator.getRoutePath(controllerPath, route.getPath());
+        const requestHandler = route.getRequestHandler();
+        if (!route.getMethod() || typeof requestHandler !== "function") {
+          throw new ConfigurationError(`Route /${routePath} must define an HTTP method and handler`);
+        }
 
-            return route.getRequestHandler()?.(res, req, controllerContext || currentContext);
+        const routeConfiguration: RouteConfiguration = {
+          path: routePath,
+          method: route.getMethod(),
+          handler: async (request, response, context) => {
+            const currentContext = (await handler?.(request, response, context)) || context;
+            const controllerContext = await controller.getHandler()?.(request, response, currentContext);
+
+            return requestHandler(request, response, controllerContext || currentContext);
           },
         };
 
@@ -89,9 +99,9 @@ export class AppConfigurator {
       .concat(
         controller.getControllers().reduce((subRoutes, subController) => {
           return subRoutes.concat(
-            this.reduceController(subController, controller.getPrefix(), async (res, req, context) => {
-              const currentContext = (await handler?.(res, req, context)) || context;
-              return controller.getHandler()?.(res, req, currentContext);
+            this.reduceController(subController, controllerPath, async (request, response, context) => {
+              const currentContext = (await handler?.(request, response, context)) || context;
+              return controller.getHandler()?.(request, response, currentContext);
             })
           );
         }, [] as RouteConfiguration[])
